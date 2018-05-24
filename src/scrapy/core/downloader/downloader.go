@@ -1,5 +1,9 @@
 package downloader
 
+import "scrapy/core/downloader/handlers"
+import "scrapy/http"
+import "scrapy/spider"
+
 type Slot struct {
 	concurrency    uint
 	delay          uint
@@ -16,18 +20,18 @@ type Downloader struct {
 	signals          string
 	slots            map[string]string
 	active           map[int]bool
-	handlers         *DownloadHandlers
+	handlers         *downloader.DownloadHandlers
 	totalConcurrency uint
 	status           int
 	body             []byte
-	request          *Request
+	request          *http.Request
 	flags            []string
 }
 
-func (downloader *Downloader) Fetch(request *Request, spider *Spider) map[int]bool {
+func (d *Downloader) Fetch(request *http.Request, spider *spider.Spider) map[int]bool {
 	return nil
 }
 
-func (downloader *Downloader) NeedsBackout() bool {
+func (d *Downloader) NeedsBackout() bool {
 	return false
 }

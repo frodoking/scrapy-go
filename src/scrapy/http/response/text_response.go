@@ -1,4 +1,4 @@
-package src
+package response
 
 type TEXTResponse struct {
 	*Response

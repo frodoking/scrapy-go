@@ -15,6 +15,6 @@ type Request struct {
 	flags      []string
 }
 
-func (request *Request) meta() string {
+func (request *Request) GetMeta() string {
 	return request.meta
 }

@@ -1,4 +1,4 @@
-package src
+package response
 
 import "scrapy/http"
 
@@ -11,18 +11,18 @@ type Response struct {
 	flags   []string
 }
 
-func (response *Response) Copy() {
+func (r *Response) Copy() {
 
 }
 
-func (response *Response) Replace() {
+func (r *Response) Replace() {
 
 }
 
-func (response *Response) Xpath() interface{} {
+func (r *Response) Xpath() interface{} {
 	return nil
 }
 
-func (response *Response) Follow() *Request {
+func (r *Response) Follow() *request.Request {
 	return nil
 }
