@@ -9,12 +9,31 @@ type Request struct {
 	headers    *http.Headers
 	body       string
 	cookies    *http.Cookies
-	meta       string
+	meta       map[string]interface{}
 	priority   int
 	dontFilter bool
 	flags      []string
+	callback   interface{}
+	errorBack  interface{}
 }
 
-func (request *Request) GetMeta() string {
+func NewRequest(url string, encoding string) *Request {
+	request := &Request{}
+	request.url = url
+	request.callback = nil
+	request.method = "GET"
+	request.encoding = encoding
+	request.headers = http.NewHeaders(make(map[string]interface{}))
+	request.body = ""
+	request.cookies = nil
+	request.meta = make(map[string]interface{})
+	request.priority = 0
+	request.dontFilter = false
+	request.errorBack = nil
+	request.flags = make([]string, 0)
+	return request
+}
+
+func (request *Request) GetMeta() map[string]interface{} {
 	return request.meta
 }

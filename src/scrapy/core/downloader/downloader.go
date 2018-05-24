@@ -7,9 +7,9 @@ import (
 )
 
 type Slot struct {
-	concurrency    uint
-	delay          uint
-	randomizeDelay uint
+	concurrency    uint8
+	delay          uint16
+	randomizeDelay uint8
 	active         map[int]bool
 	queue          []string
 	transferring   map[int]bool
@@ -24,7 +24,7 @@ type Downloader struct {
 	active           map[int]bool
 	handlers         *handlers.DownloadHandlers
 	totalConcurrency uint
-	status           int
+	status           uint8
 	body             []byte
 	request          *request.Request
 	flags            []string
