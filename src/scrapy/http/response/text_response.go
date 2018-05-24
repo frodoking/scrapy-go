@@ -4,6 +4,6 @@ type TEXTResponse struct {
 	*Response
 }
 
-func Xpath(response *TEXTResponse) interface{} {
+func (r *TEXTResponse) Xpath() interface{} {
 	return nil
 }

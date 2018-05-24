@@ -6,9 +6,9 @@ type Request struct {
 	url        string
 	encoding   string
 	method     string
-	headers    *headers.Headers
+	headers    *http.Headers
 	body       string
-	cookies    *cookies.Cookies
+	cookies    *http.Cookies
 	meta       string
 	priority   int
 	dontFilter bool

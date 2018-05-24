@@ -1,10 +1,11 @@
 package response
 
 import "scrapy/http"
+import "scrapy/http/request"
 
 type Response struct {
 	url     string
-	headers *headers.Headers
+	headers *http.Headers
 	status  int
 	body    []byte
 	request *request.Request
