@@ -1,4 +1,4 @@
-package scrapy
+package middleware
 
 import "scrapy/http/request"
 import "scrapy/spiders"

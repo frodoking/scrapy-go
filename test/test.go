@@ -2,11 +2,13 @@ package main
 
 import "log"
 import (
-	"scrapy"
-	"scrapy/settings"
+	"scrapy/crawler"
 )
 
 func main() {
-	log.Println(scrapy.NewCrawlerProcess().Print())
-	settings.NewCrawlerSettings()
+	log.Println(crawler.NewCrawlerProcess().Print())
+	v := []int {100, 200, 300, 400}
+	for i,item := range v {
+		println(i, item)
+	}
 }

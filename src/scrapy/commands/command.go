@@ -1,16 +1,16 @@
 package commands
 
 import "scrapy/settings"
-import "scrapy"
+import "scrapy/crawler"
 
 type ScrapyCommand struct {
 	Name            string
 	RequiresProject bool
 	settings        settings.Settings
-	crawler         scrapy.Crawler
+	crawler         crawler.Crawler
 }
 
-func (c *ScrapyCommand) SetCrawler(crawler scrapy.Crawler) {
+func (c *ScrapyCommand) SetCrawler(crawler crawler.Crawler) {
 	c.crawler = crawler
 }
 

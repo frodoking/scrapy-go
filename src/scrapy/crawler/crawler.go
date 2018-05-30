@@ -1,4 +1,4 @@
-package scrapy
+package crawler
 
 import (
 	"scrapy/spiders"
