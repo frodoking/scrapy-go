@@ -9,7 +9,6 @@ type FileDownloadHandler struct {
 	*DownloadHandlers
 }
 
-func (fdh *FileDownloadHandler) DownloadRequest(request *request.Request, spider *spiders.Spider) interface {} {
+func (fdh *FileDownloadHandler) DownloadRequest(request *request.Request, spider *spiders.Spider) interface{} {
 	return nil
 }
-

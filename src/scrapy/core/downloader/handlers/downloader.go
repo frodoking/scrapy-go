@@ -12,6 +12,6 @@ type DownloadHandlers struct {
 	notConfigured map[string]string
 }
 
-func (dh *DownloadHandlers) DownloadRequest(request *request.Request, spider *spiders.Spider) interface {} {
+func (dh *DownloadHandlers) DownloadRequest(request *request.Request, spider *spiders.Spider) interface{} {
 	return nil
 }

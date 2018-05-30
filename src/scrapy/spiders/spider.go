@@ -1,6 +1,8 @@
 package spiders
 
 type Spider struct {
+	name           string
+	customSettings map[string]string
 	concurrency    uint
 	delay          uint
 	randomizeDelay uint
@@ -9,4 +11,9 @@ type Spider struct {
 	transferring   map[int]bool
 	lastSeen       uint
 	laterCall      interface{}
+}
+
+func NewDefaultSpider() *Spider {
+	spider := &Spider{}
+	return spider
 }
