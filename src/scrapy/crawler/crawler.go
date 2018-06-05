@@ -8,7 +8,7 @@ import (
 
 type Crawler struct {
 	spider *spiders.Spider
-	settings *settings.Settings
+	Settings *settings.Settings
 }
 
 func (c *Crawler) spiders() []spiders.Spider {

@@ -1,6 +1,5 @@
 package middleware
 
-import "scrapy/http/request"
 import "scrapy/spiders"
 
 type MiddlewareManager struct {
@@ -8,7 +7,10 @@ type MiddlewareManager struct {
 	methods map[string]string
 }
 
+func (m *MiddlewareManager) OpenSpider(spider *spiders.Spider) chan struct{} {
+	return nil
+}
 
-func (m *MiddlewareManager) download(downloadFunc interface{}, request *request.Request, spider *spiders.Spider) {
-
+func (m *MiddlewareManager) CloseSpider(spider *spiders.Spider) chan struct{} {
+	return nil
 }

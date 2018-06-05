@@ -7,7 +7,7 @@ type Response struct {
 	url     string
 	headers *http.Headers
 	status  int
-	body    []byte
+	Body    []byte
 	request *request.Request
 	flags   []string
 }
@@ -17,7 +17,7 @@ func NewResponse(url string) *Response {
 	response.url = url
 	response.status = 200
 	response.headers = http.NewHeaders(make(map[string]interface{}))
-	response.body = make([]byte, 0)
+	response.Body = make([]byte, 0)
 	response.flags = make([]string, 0)
 	return response
 }

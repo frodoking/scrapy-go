@@ -1,7 +1,11 @@
 package main
 
 import (
+	"fmt"
+	"io"
 	"log"
+	"net"
+	"net/http"
 	"sync"
 	"time"
 )
@@ -114,6 +118,61 @@ func testTimeout() {
 	}
 }
 
+func testHttp() {
+	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
+		fmt.Fprintf(writer, "asdfasdf")
+	})
+	http.HandleFunc("/xx", func(writer http.ResponseWriter, request *http.Request) {
+		fmt.Fprintf(writer, "xxxxxx")
+	})
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func testHttpProxy() {
+	listener, err := net.Listen("tcp", ":8080")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		go func(from net.Conn) {
+			to, err := net.Dial("tcp", "8001")
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			done := make(chan struct{})
+
+			go func() {
+				defer from.Close()
+				defer to.Close()
+
+				io.Copy(from, to)
+
+				done <- struct{}{}
+			}()
+
+			go func() {
+				defer from.Close()
+				defer to.Close()
+
+				io.Copy(to, from)
+				io.Copy(to, from)
+
+				done <- struct{}{}
+			}()
+
+			<-done
+			<-done
+		}(conn)
+	}
+}
+
 func main() {
 	testChannel()
 	testMultiChannel()
@@ -121,5 +180,7 @@ func main() {
 	testWork()
 	testMultiWork()
 	testTimeout()
-	time.Sleep(time.Second * 100)
+
+	testHttp()
+	testHttpProxy()
 }

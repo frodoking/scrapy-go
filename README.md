@@ -17,3 +17,8 @@ The data flow in Scrapy is controlled by the execution engine, and goes like thi
 > * The Spider processes the Response and returns scraped items and new Requests (to follow) to the Engine, passing through the Spider > * Middleware (see process_spider_output()).
 > * The Engine sends processed items to Item Pipelines, then send processed Requests to the Scheduler and asks for possible next Requests > * to crawl.
 > * The process repeats (from step 1) until there are no more requests from the Scheduler.
+
+
+Related Projects
+
+* [scrapy-parsel-go](https://github.com/frodoking/scrapy-parsel-go)

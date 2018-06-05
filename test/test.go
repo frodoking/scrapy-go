@@ -9,8 +9,18 @@ import (
 func main() {
 	log.Println(crawler.NewCrawlerProcess().Print())
 	v := []int {100, 200, 300, 400}
+
 	for i,item := range v {
-		println(i, item)
+		println("-----",i, item)
+	}
+
+	a:= append(v, 123)
+	for i,item := range v {
+		println("+++++", i, item)
+	}
+
+	for i,item := range a {
+		println(">>>>>>", i, item)
 	}
 
 	num := runtime.NumCPU() //本地机器的逻辑CPU个数
