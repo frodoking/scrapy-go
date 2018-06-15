@@ -8,7 +8,7 @@ import (
 
 type Spider struct {
 	name           string
-	customSettings map[string]string
+	startUrls  		[]string
 	concurrency    uint
 	delay          uint
 	randomizeDelay uint

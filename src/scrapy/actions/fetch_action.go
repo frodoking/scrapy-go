@@ -1,30 +1,31 @@
-package commands
+package actions
 
 import (
-	"regexp"
 	"scrapy/http/request"
 	"scrapy/spiders"
+	"regexp"
 )
 
-type FetchCommand struct {
-	*ScrapyCommand
+type FetchAction struct {
+	ScrapyAction
 	crawlerProcess interface{}
 }
 
-func (c *FetchCommand) Syntax() string {
+
+func (c *FetchAction) Syntax() string {
 	return "[options] <url>"
 }
 
-func (c *FetchCommand) ShortDesc() string {
+func (c *FetchAction) ShortDesc() string {
 	return "Fetch a URL using the Scrapy downloader"
 }
 
-func (c *FetchCommand) LongDesc() string {
+func (c *FetchAction) LongDesc() string {
 	return "to stdout. You may want to use --nolog to disable logging " +
 		"Fetch a URL using the Scrapy downloader and print its content "
 }
 
-func (c *FetchCommand) Run(args []string, opts []string) {
+func (c *FetchAction) Run(args []string, opts []string) {
 	if len(args) != 1 || checkUrl(args[0]) {
 		panic("xxxx")
 	}
