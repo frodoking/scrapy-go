@@ -1,8 +1,8 @@
 package downloader
 
 import (
-	"scrapy/middleware"
 	"scrapy/http/request"
+	"scrapy/middleware"
 	"scrapy/spiders"
 )
 

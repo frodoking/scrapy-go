@@ -1,16 +1,15 @@
 package actions
 
 import (
+	"regexp"
 	"scrapy/http/request"
 	"scrapy/spiders"
-	"regexp"
 )
 
 type FetchAction struct {
 	ScrapyAction
 	crawlerProcess interface{}
 }
-
 
 func (c *FetchAction) Syntax() string {
 	return "[options] <url>"

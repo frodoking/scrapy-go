@@ -2,24 +2,24 @@ package main
 
 import "log"
 import (
-	"scrapy/crawler"
 	"runtime"
+	"scrapy/crawler"
 )
 
 func main() {
 	log.Println(crawler.NewCrawlerProcess().Print())
-	v := []int {100, 200, 300, 400}
+	v := []int{100, 200, 300, 400}
 
-	for i,item := range v {
-		println("-----",i, item)
+	for i, item := range v {
+		println("-----", i, item)
 	}
 
-	a:= append(v, 123)
-	for i,item := range v {
+	a := append(v, 123)
+	for i, item := range v {
 		println("+++++", i, item)
 	}
 
-	for i,item := range a {
+	for i, item := range a {
 		println(">>>>>>", i, item)
 	}
 

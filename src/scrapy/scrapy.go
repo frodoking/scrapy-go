@@ -3,6 +3,7 @@ package scrapy
 import (
 	"os"
 	"scrapy/actions"
+	"scrapy/crawler"
 	"scrapy/settings"
 )
 
@@ -23,6 +24,8 @@ func (s *Scrapy) Execute(argv []string, mSettings *settings.CrawlerSettings) {
 	}
 
 	crawlAction := &actions.CrawlAction{ScrapyAction: actions.ScrapyAction{Name: "", RequiresProject: false}}
-	crawlAction.Run(argv, nil)
-	print("xxxx")
+	crawlAction.Settings = mSettings.Settings
+	crawlAction.CrawlerProcess = crawler.NewCrawlerProcess()
+
+	go crawlAction.Run(argv, nil)
 }

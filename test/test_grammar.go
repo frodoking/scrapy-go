@@ -1,8 +1,8 @@
 package main
 
 import (
-	"log"
 	"fmt"
+	"log"
 )
 
 type Animal interface {
@@ -50,12 +50,12 @@ func calc(index string, a, b int) int {
 
 // defer calc func中参数b必须先计算. defer是在函数末尾的return前执行，先进后执行
 func testCalc() {
-	a := 1                                             //line 1
-	b := 2                                             //2
-	defer calc("1", a, calc("10", a, b))  //3
-	a = 0                                              //4
-	defer calc("2", a, calc("20", a, b))  //5
-	b = 1                                              //6
+	a := 1                               //line 1
+	b := 2                               //2
+	defer calc("1", a, calc("10", a, b)) //3
+	a = 0                                //4
+	defer calc("2", a, calc("20", a, b)) //5
+	b = 1                                //6
 }
 
 func main() {

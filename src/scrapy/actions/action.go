@@ -6,11 +6,12 @@ import "scrapy/crawler"
 type ScrapyAction struct {
 	Name            string
 	RequiresProject bool
-	settings        settings.Settings
-	crawler         crawler.Crawler
+	CrawlerProcess  *crawler.CrawlerProcess
+	Settings        *settings.Settings
+	crawler         *crawler.Crawler
 }
 
-func (c *ScrapyAction) SetCrawler(crawler crawler.Crawler) {
+func (c *ScrapyAction) SetCrawler(crawler *crawler.Crawler) {
 	c.crawler = crawler
 }
 
@@ -40,5 +41,6 @@ func (c *ScrapyAction) ProcessOptions() string {
 }
 
 func (c *ScrapyAction) Run(args []string, opts []string) {
+	c.CrawlerProcess.Crawl(nil, args, opts)
+	c.CrawlerProcess.Start()
 }
-
