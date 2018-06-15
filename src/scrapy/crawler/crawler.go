@@ -9,7 +9,7 @@ import (
 
 type Crawler struct {
 	spider   *spiders.Spider
-	Settings *settings.Settings
+	Settings *settings.CrawlerSettings
 	engine *core.ExecutionEngine
 	crawling bool
 }
@@ -44,7 +44,7 @@ type CrawlerRunner struct {
 	aa string
 }
 
-func (cr *CrawlerRunner) Crawl(crawlerOrSpiderCls *interface{}, args []string, kwargs []string) bool{
+func (cr *CrawlerRunner) Crawl(crawlerOrSpiderCls interface{}, args []string, kwargs []string) bool{
 	crawler := cr.CreateCrawler(crawlerOrSpiderCls)
 	return cr.crawl(crawler, args, kwargs)
 }
@@ -56,21 +56,21 @@ func (cr *CrawlerRunner) crawl(crawler *Crawler, args []string, kwargs []string)
 }
 
 
-func (cr *CrawlerRunner) CreateCrawler(crawlerOrSpiderCls *interface{}) *Crawler {
+func (cr *CrawlerRunner) CreateCrawler(crawlerOrSpiderCls interface{}) *Crawler {
 	_, ok := crawlerOrSpiderCls.(Crawler)
 	if ok {
-		return crawlerOrSpiderCls
+		return crawlerOrSpiderCls.(*Crawler)
 	} else {
 		return cr.createCrawler(crawlerOrSpiderCls)
 	}
 }
 
-func (cr *CrawlerRunner) createCrawler(spiderCls *interface{}) *Crawler {
+func (cr *CrawlerRunner) createCrawler(spiderCls interface{}) *Crawler {
 	_, ok := spiderCls.(string)
 	if ok {
 		spiderCls = nil
 	}
-	return &Crawler{spiderCls, cr.Settings}
+	return &Crawler{spider: spiderCls.(*spiders.Spider), Settings: cr.Settings}
 }
 
 func (cr *CrawlerRunner) Stop() {
@@ -95,5 +95,5 @@ func (cp *CrawlerProcess) Print() string {
 }
 
 func NewCrawlerProcess() *CrawlerProcess {
-	return &CrawlerProcess{&CrawlerRunner{nil, "aa"}, "bbb"}
+	return &CrawlerProcess{&CrawlerRunner{crawlers: "aa"}, "bbb"}
 }
