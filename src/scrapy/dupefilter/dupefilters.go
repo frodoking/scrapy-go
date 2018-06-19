@@ -10,7 +10,7 @@ import (
 type BaseDupeFilter interface {
 	RequestSeen(request *request.Request)
 	Open() chan string
-	Close() chan string
+	Close(reason string) chan string
 	Log(request *request.Request, spider *spiders.Spider) chan string
 }
 
@@ -45,7 +45,7 @@ func (f *RFPDupeFilter) Open() chan string {
 	return defered
 }
 
-func (f *RFPDupeFilter) Close() chan string {
+func (f *RFPDupeFilter) Close(reason string) chan string {
 	defered := make(chan string, 1)
 
 	return defered

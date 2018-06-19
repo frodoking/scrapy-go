@@ -20,3 +20,5 @@
 *.iws
 out
 .idea
+
+pkg

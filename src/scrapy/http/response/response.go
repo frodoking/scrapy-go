@@ -8,7 +8,7 @@ type Response struct {
 	headers *http.Headers
 	status  int
 	Body    []byte
-	request *request.Request
+	Request *request.Request
 	flags   []string
 }
 

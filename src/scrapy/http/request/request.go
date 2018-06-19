@@ -9,7 +9,7 @@ type Request struct {
 	headers    *http.Headers
 	body       string
 	cookies    *http.Cookies
-	meta       map[string]interface{}
+	Meta       map[string]interface{}
 	priority   int
 	dontFilter bool
 	flags      []string

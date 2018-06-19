@@ -5,7 +5,7 @@ import (
 	"scrapy/crawler"
 	"scrapy/http/request"
 	"scrapy/http/response"
-	"scrapy/middleware"
+	"scrapy/middleware/spidermiddlewares"
 	"scrapy/spiders"
 )
 
@@ -33,7 +33,7 @@ func NewScraperSlot(maxActiveSize uint) *ScraperSlot {
 	return &ScraperSlot{maxActiveSize, make([]*ResponseRequestDefer, 10), make(map[*request.Request]bool), 0, 0, nil}
 }
 
-func (ss *ScraperSlot) AddResponseRequest(resp *response.Response, req *request.Request) bool {
+func (ss *ScraperSlot) AddResponseRequest(resp *response.Response, req *request.Request) chan bool {
 	deferred := make(chan bool, 1)
 	ss.queue = append(ss.queue, &ResponseRequestDefer{resp, req, deferred})
 
@@ -46,7 +46,7 @@ func (ss *ScraperSlot) AddResponseRequest(resp *response.Response, req *request.
 	} else {
 		ss.activeSize += MIN_RESPONSE_SIZE
 	}
-	return <-deferred
+	return deferred
 }
 
 func (ss *ScraperSlot) NextResponseRequestDeferred() *ResponseRequestDefer {
@@ -75,7 +75,7 @@ func (ss *ScraperSlot) IsIdle() bool {
 
 type Scraper struct {
 	slot            *ScraperSlot
-	spidermw        *middleware.MiddlewareManager
+	spidermw        *middleware.SpiderMiddlewareManager
 	itemProc        interface{}
 	concurrentItems interface{}
 	crawler         *crawler.Crawler
@@ -98,8 +98,15 @@ func (s *Scraper) IsIdle() bool {
 	return s.slot == nil
 }
 
-func (s *Scraper) EnqueueScrape(resp *response.Response, req *request.Request, spider *spiders.Spider) bool {
-	return s.slot.AddResponseRequest(resp, req)
+func (s *Scraper) EnqueueScrape(resp *response.Response, req *request.Request, spider *spiders.Spider) chan bool {
+	slot := s.slot
+	defered := slot.AddResponseRequest(resp, req)
+	s.scrapeNext(spider, slot)
+	return defered
+}
+
+func (s *Scraper) scrapeNext(spider *spiders.Spider, slot *ScraperSlot) {
+
 }
 
 func (s *Scraper) HandleSpiderError(failure string, resp *response.Response, req *request.Request, spider *spiders.Spider) {

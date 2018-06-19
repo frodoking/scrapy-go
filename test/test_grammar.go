@@ -1,9 +1,9 @@
 package main
 
 import (
+	"container/list"
 	"fmt"
 	"log"
-	"container/list"
 )
 
 type Animal interface {
@@ -59,7 +59,7 @@ func testCalc() {
 	b = 1                                //6
 }
 
-func testList()  {
+func testList() {
 	l := list.New() //创建一个新的list
 	for i := 0; i < 5; i++ {
 		l.PushBack(i)
@@ -93,9 +93,38 @@ func testList()  {
 	fmt.Println("")
 }
 
+type aa interface {
+	MyPrint()
+}
+
+type bb struct {
+	str string
+}
+
+func (b *bb) MyPrint() {
+	println(b.str)
+}
+
+type cc struct {
+	str string
+}
+
+func (c *cc) Myprint(a aa) {
+	a.MyPrint()
+}
+
+func testInterface2() {
+	b := &bb{"bbbbbb"}
+	c := &cc{"cccccc"}
+	c.Myprint(b)
+	b.str = "xxxxxxx"
+	c.Myprint(b)
+}
+
 func main() {
 	testInterface()
 	testDeferCall()
 	testCalc()
 	testList()
+	testInterface2()
 }

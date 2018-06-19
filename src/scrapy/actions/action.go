@@ -42,5 +42,5 @@ func (c *ScrapyAction) ProcessOptions() string {
 
 func (c *ScrapyAction) Run(args []string, opts []string) {
 	c.CrawlerProcess.Crawl(nil, args, opts)
-	c.CrawlerProcess.Start()
+	c.CrawlerProcess.Start(true)
 }

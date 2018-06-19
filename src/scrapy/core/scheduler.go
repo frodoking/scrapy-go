@@ -4,6 +4,7 @@ import (
 	"scrapy/crawler"
 	"scrapy/dupefilter"
 	"scrapy/http/request"
+	"scrapy/spiders"
 	"strconv"
 )
 
@@ -43,12 +44,12 @@ func (s *Scheduler) HasPendingRequests() bool {
 	return false
 }
 
-func (s *Scheduler) Open() chan string {
+func (s *Scheduler) Open(spider *spiders.Spider) chan string {
 	return s.df.Open()
 }
 
-func (s *Scheduler) Close() chan string {
-	return s.df.Close()
+func (s *Scheduler) Close(reason string) chan string {
+	return s.df.Close(reason)
 }
 
 func (s *Scheduler) EnqueueRequest(request *request.Request) bool {

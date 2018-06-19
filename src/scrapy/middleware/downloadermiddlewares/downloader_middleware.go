@@ -1,4 +1,4 @@
-package downloader
+package middleware
 
 import (
 	"scrapy/http/request"
@@ -10,6 +10,6 @@ type DownloaderMiddlewareManager struct {
 	*middleware.MiddlewareManager
 }
 
-func (m *DownloaderMiddlewareManager) download(downloadFunc interface{}, request *request.Request, spider *spiders.Spider) {
+func (m *DownloaderMiddlewareManager) Download(downloadFunc interface{}, request *request.Request, spider *spiders.Spider) {
 
 }

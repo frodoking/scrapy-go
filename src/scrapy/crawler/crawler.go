@@ -2,15 +2,15 @@ package crawler
 
 import (
 	"fmt"
+	"scrapy/core"
 	"scrapy/settings"
 	"scrapy/spiders"
-	"scrapy/core"
 )
 
 type Crawler struct {
 	spider   *spiders.Spider
 	Settings *settings.CrawlerSettings
-	engine *core.ExecutionEngine
+	engine   *core.ExecutionEngine
 	crawling bool
 }
 
@@ -41,10 +41,10 @@ func (c *Crawler) createEngine() *core.ExecutionEngine {
 type CrawlerRunner struct {
 	Settings *settings.CrawlerSettings
 	crawlers []*Crawler
-	aa string
+	aa       string
 }
 
-func (cr *CrawlerRunner) Crawl(crawlerOrSpiderCls interface{}, args []string, kwargs []string) bool{
+func (cr *CrawlerRunner) Crawl(crawlerOrSpiderCls interface{}, args []string, kwargs []string) bool {
 	crawler := cr.CreateCrawler(crawlerOrSpiderCls)
 	return cr.crawl(crawler, args, kwargs)
 }
@@ -54,7 +54,6 @@ func (cr *CrawlerRunner) crawl(crawler *Crawler, args []string, kwargs []string)
 	crawler.Crawl(args, kwargs)
 	return true
 }
-
 
 func (cr *CrawlerRunner) CreateCrawler(crawlerOrSpiderCls interface{}) *Crawler {
 	_, ok := crawlerOrSpiderCls.(Crawler)
@@ -95,5 +94,5 @@ func (cp *CrawlerProcess) Print() string {
 }
 
 func NewCrawlerProcess() *CrawlerProcess {
-	return &CrawlerProcess{&CrawlerRunner{crawlers: "aa"}, "bbb"}
+	return &CrawlerProcess{&CrawlerRunner{}, "bbb"}
 }
