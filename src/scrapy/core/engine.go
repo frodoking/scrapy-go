@@ -115,7 +115,7 @@ func (ee *ExecutionEngine) nextRequestFromScheduler(spider *spiders.Spider) chan
 	}
 	result := ee.download(req, spider)
 
-	ee.handleDownloaderOutput(nil, req, spider)
+	ee.handleDownloaderOutput((<-result).(*response.Response), req, spider)
 	return result
 }
 

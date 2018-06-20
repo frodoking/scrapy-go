@@ -26,8 +26,6 @@ func (r *Response) Meta() map[string]interface{} {
 	return r.Request.Meta
 }
 
-
-
 func (r *Response) Copy() {
 	r.Replace()
 }
@@ -48,7 +46,7 @@ func (r *Response) CSS() string {
 	return ""
 }
 
-func (r *Response) Xpath(args []string, kwargs []string) interface{} {
+func (r *Response) XPath(args []string, kwargs []string) interface{} {
 	return nil
 }
 

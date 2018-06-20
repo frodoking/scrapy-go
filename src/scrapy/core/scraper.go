@@ -25,7 +25,7 @@ type ScraperSlot struct {
 	active        map[*request.Request]bool
 	activeSize    int
 	itemProcSize  uint
-	closing       bool
+	closing       chan interface{}
 }
 
 func NewScraperSlot(maxActiveSize uint) *ScraperSlot {
@@ -93,22 +93,50 @@ func (s *Scraper) OpenSpider(spider *spiders.Spider) {
 	//itemProc := utils.LoadObject(s.crawler.Settings.Get("ITEM_PROCESSOR"))
 }
 
-func (s *Scraper) CloseSpider(spider *spiders.Spider) bool {
-	return s.slot.closing
+func (s *Scraper) CloseSpider(spider *spiders.Spider) chan interface{} {
+	slot := s.slot
+	slot.closing = make(chan interface{})
+	s.checkIfClosing(spider, slot)
+	return slot.closing
 }
 
 func (s *Scraper) IsIdle() bool {
 	return s.slot == nil
 }
 
+func (s *Scraper) checkIfClosing(spider *spiders.Spider, slot *ScraperSlot) {
+	if <-slot.closing != nil && slot.IsIdle() {
+
+	}
+}
+
 func (s *Scraper) EnqueueScrape(resp *response.Response, req *request.Request, spider *spiders.Spider) chan interface{} {
 	slot := s.slot
 	result := slot.AddResponseRequest(resp, req)
+
+	for {
+		select {
+		case <-result:
+			slot.FinishResponse(resp, req)
+			s.checkIfClosing(spider, slot)
+		}
+	}
 	s.scrapeNext(spider, slot)
 	return result
 }
 
 func (s *Scraper) scrapeNext(spider *spiders.Spider, slot *ScraperSlot) {
+	for _, defered := range slot.queue {
+		nextDeferred := slot.NextResponseRequestDeferred()
+		s.scrape(nextDeferred.Resp, nextDeferred.Req, spider)
+	}
+}
+
+func (s *Scraper) scrape(resp *response.Response, req *request.Request, spider *spiders.Spider) {
+
+}
+
+func (s *Scraper) scrape2(resp *response.Response, req *request.Request, spider *spiders.Spider) chan interface{} {
 
 }
 

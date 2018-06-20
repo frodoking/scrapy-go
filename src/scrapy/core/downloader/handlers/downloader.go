@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"scrapy/http/request"
+	"scrapy/spiders"
 )
 
 type DownloadHandlers struct {
@@ -14,6 +15,7 @@ func NewDownloadHandlers() *DownloadHandlers {
 	return &DownloadHandlers{}
 }
 
-func (dh *DownloadHandlers) DownloadRequest(request *request.Request) interface{} {
-	return nil
+func (dh *DownloadHandlers) DownloadRequest(request *request.Request, spider *spiders.Spider) chan interface{} {
+	result := make(chan interface{}, 1)
+	return result
 }
