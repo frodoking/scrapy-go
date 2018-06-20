@@ -9,12 +9,14 @@ import (
 	"scrapy/spiders"
 )
 
-const MIN_RESPONSE_SIZE = 1024
+const (
+	MinResponseSize = 1024
+)
 
 type ResponseRequestDefer struct {
 	Resp  *response.Response
 	Req   *request.Request
-	Defer chan bool
+	Defer chan interface{}
 }
 
 type ScraperSlot struct {
@@ -33,18 +35,18 @@ func NewScraperSlot(maxActiveSize uint) *ScraperSlot {
 	return &ScraperSlot{maxActiveSize, make([]*ResponseRequestDefer, 10), make(map[*request.Request]bool), 0, 0, nil}
 }
 
-func (ss *ScraperSlot) AddResponseRequest(resp *response.Response, req *request.Request) chan bool {
-	deferred := make(chan bool, 1)
+func (ss *ScraperSlot) AddResponseRequest(resp *response.Response, req *request.Request) chan interface{} {
+	deferred := make(chan interface{})
 	ss.queue = append(ss.queue, &ResponseRequestDefer{resp, req, deferred})
 
 	if reflect.TypeOf(resp).Name() == "Response" {
 		max := len(resp.Body)
-		if max < MIN_RESPONSE_SIZE {
-			max = MIN_RESPONSE_SIZE
+		if max < MinResponseSize {
+			max = MinResponseSize
 		}
 		ss.activeSize += max
 	} else {
-		ss.activeSize += MIN_RESPONSE_SIZE
+		ss.activeSize += MinResponseSize
 	}
 	return deferred
 }
@@ -60,12 +62,12 @@ func (ss *ScraperSlot) FinishResponse(resp *response.Response, req *request.Requ
 	delete(ss.active, req)
 	if reflect.TypeOf(resp).Name() == "Response" {
 		max := len(resp.Body)
-		if max < MIN_RESPONSE_SIZE {
-			max = MIN_RESPONSE_SIZE
+		if max < MinResponseSize {
+			max = MinResponseSize
 		}
 		ss.activeSize -= max
 	} else {
-		ss.activeSize -= MIN_RESPONSE_SIZE
+		ss.activeSize -= MinResponseSize
 	}
 }
 
@@ -87,6 +89,7 @@ func NewScraper(crawler *crawler.Crawler) {
 
 func (s *Scraper) OpenSpider(spider *spiders.Spider) {
 	s.slot = NewScraperSlot(-1)
+
 	//itemProc := utils.LoadObject(s.crawler.Settings.Get("ITEM_PROCESSOR"))
 }
 
@@ -98,11 +101,11 @@ func (s *Scraper) IsIdle() bool {
 	return s.slot == nil
 }
 
-func (s *Scraper) EnqueueScrape(resp *response.Response, req *request.Request, spider *spiders.Spider) chan bool {
+func (s *Scraper) EnqueueScrape(resp *response.Response, req *request.Request, spider *spiders.Spider) chan interface{} {
 	slot := s.slot
-	defered := slot.AddResponseRequest(resp, req)
+	result := slot.AddResponseRequest(resp, req)
 	s.scrapeNext(spider, slot)
-	return defered
+	return result
 }
 
 func (s *Scraper) scrapeNext(spider *spiders.Spider, slot *ScraperSlot) {

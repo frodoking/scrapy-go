@@ -26,14 +26,10 @@ func NewRequest(url string, encoding string) *Request {
 	request.headers = http.NewHeaders(make(map[string]interface{}))
 	request.body = ""
 	request.cookies = nil
-	request.meta = make(map[string]interface{})
+	request.Meta = make(map[string]interface{})
 	request.priority = 0
 	request.dontFilter = false
 	request.errorBack = nil
 	request.flags = make([]string, 0)
 	return request
-}
-
-func (request *Request) GetMeta() map[string]interface{} {
-	return request.meta
 }

@@ -1,6 +1,7 @@
 package spiders
 
 import (
+	"container/list"
 	"scrapy/crawler"
 	"scrapy/http/request"
 	"scrapy/http/response"
@@ -29,11 +30,11 @@ func (s *Spider) SetCrawler(crawler *crawler.Crawler) {
 
 }
 
-func (s *Spider) StartRequests() []*request.Request {
-	requests := make([]*request.Request, len(s.startUrls))
+func (s *Spider) StartRequests() *list.List {
+	requests := list.New()
 	for i, url := range s.startUrls {
 		req := s.MakeRequestsFromUrl(url)
-		requests[i] = req
+		requests.PushBack(req)
 	}
 	return requests
 }

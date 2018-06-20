@@ -2,13 +2,13 @@ package core
 
 import (
 	"container/list"
+	"go/types"
+	"reflect"
 	"scrapy/core/downloader"
 	"scrapy/crawler"
 	"scrapy/http/request"
 	"scrapy/http/response"
 	"scrapy/spiders"
-	"go/types"
-	"reflect"
 )
 
 type EngineSlot struct {
@@ -107,35 +107,23 @@ func (ee *ExecutionEngine) nextRequest(spider *spiders.Spider) *request.Request 
 	return nil
 }
 
-func (ee *ExecutionEngine) nextRequestFromScheduler(spider *spiders.Spider) chan bool {
+func (ee *ExecutionEngine) nextRequestFromScheduler(spider *spiders.Spider) chan interface{} {
 	slot := ee.slot
 	req := slot.scheduler.NextRequest()
 	if req == nil {
 		return nil
 	}
-	response := ee.download(req, spider)
+	result := ee.download(req, spider)
 
 	ee.handleDownloaderOutput(nil, req, spider)
-	return defered
+	return result
 }
 
-func (ee *ExecutionEngine) download(req *request.Request, spider *spiders.Spider) (func(resp *response.Response) *response.Response, func()) {
+func (ee *ExecutionEngine) download(req *request.Request, spider *spiders.Spider) chan interface{} {
 	slot := ee.slot
 	slot.AddRequest(req)
 
-	successCallback := func(resp *response.Response) *response.Response {
-		if reflect.TypeOf(resp).Name() == "Response" {
-			resp.Request = req
-			return resp
-		}
-	}
-
-	onCompleteCallback:= func() {
-		print("")
-	}
-
-	ee.downloader.Fetch(req, spider)
-	return successCallback, onCompleteCallback
+	return ee.downloader.Fetch(req, spider)
 }
 
 func (ee *ExecutionEngine) handleDownloaderOutput(resp *response.Response, req *request.Request, spider *spiders.Spider) interface{} {

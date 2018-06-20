@@ -22,15 +22,33 @@ func NewResponse(url string) *Response {
 	return response
 }
 
-func (r *Response) Copy() {
+func (r *Response) Meta() map[string]interface{} {
+	return r.Request.Meta
+}
 
+
+
+func (r *Response) Copy() {
+	r.Replace()
 }
 
 func (r *Response) Replace() {
 
 }
 
-func (r *Response) Xpath() interface{} {
+func (r *Response) UrlJoin(url string) {
+
+}
+
+func (r *Response) Text() string {
+	return ""
+}
+
+func (r *Response) CSS() string {
+	return ""
+}
+
+func (r *Response) Xpath(args []string, kwargs []string) interface{} {
 	return nil
 }
 

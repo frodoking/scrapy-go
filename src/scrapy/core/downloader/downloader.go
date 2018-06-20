@@ -42,10 +42,10 @@ func NewDownloader(crawler *crawler.Crawler) *Downloader {
 	return downloader
 }
 
-func (d *Downloader) Fetch(req *request.Request, spider *spiders.Spider) map[int]bool {
+func (d *Downloader) Fetch(req *request.Request, spider *spiders.Spider) chan interface{} {
 	delete(d.active, req)
-	d.middleware.Download(d.enqueueRequest, req, spider)
-	return nil
+	result := d.middleware.Download(d.enqueueRequest, req, spider)
+	return result
 }
 
 func (d *Downloader) NeedsBackout() bool {
@@ -66,5 +66,5 @@ func (d *Downloader) enqueueRequest(req *request.Request, spider *spiders.Spider
 }
 
 func (d *Downloader) getSlot(req *request.Request, spider *spiders.Spider) (string, *DownloaderSlot) {
-	return nil, nil
+	return "", nil
 }

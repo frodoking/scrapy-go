@@ -121,10 +121,50 @@ func testInterface2() {
 	c.Myprint(b)
 }
 
+func testChan(name string, callback chan interface{}) {
+	callback <- name
+}
+
+func testChan2(name string) chan interface{} {
+	result := make(chan interface{})
+	go func() {
+		result <- name
+	}()
+	return result
+}
+
+func testClosure() []func() {
+	var s []func()
+
+	for i := 0; i < 3; i++ {
+		x := i
+		s = append(s, func() {
+			fmt.Println(&x, x)
+		})
+	}
+
+	return s
+}
+
 func main() {
 	testInterface()
 	testDeferCall()
 	testCalc()
 	testList()
 	testInterface2()
+
+	callback := make(chan interface{})
+	go testChan("frodo", callback)
+	result := <-callback
+
+	println("First callback >>>", result)
+
+	callback2 := testChan2("frdoking")
+	result2 := <-callback2
+	aa := result2.(string)
+	println("Second callback >>>", aa)
+
+	for _, f := range testClosure() {
+		f()
+	}
 }
