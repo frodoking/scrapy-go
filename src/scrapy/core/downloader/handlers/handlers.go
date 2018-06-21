@@ -2,7 +2,8 @@ package handlers
 
 import (
 	"errors"
-	"reflect"
+	"fmt"
+	"net/url"
 	"scrapy/http/request"
 	"scrapy/spiders"
 )
@@ -24,26 +25,26 @@ type DownloadHandler interface {
 type DownloadHandlers struct {
 	schemes       map[string]string
 	handlers      map[string]DownloadHandler
-	notConfigured map[string]DownloadHandler
+	notConfigured map[string]string
 }
 
 func NewDownloadHandlers() *DownloadHandlers {
 	schemes := make(map[string]string)
-	handlers := make(map[string]DownloadHandlers)
-	notConfigured := make(map[string]DownloadHandlers)
+	handlers := make(map[string]DownloadHandler)
+	notConfigured := make(map[string]string)
 
 	for scheme, class := range Classes {
 		schemes[scheme] = scheme
 		switch class {
 		case "http":
 		case "https":
-			schemes[scheme] = &HttpDownloadHandler{}
+			handlers[scheme] = &HttpDownloadHandler{}
 			break
 		case "file":
-			schemes[scheme] = &FileDownloadHandler{}
+			handlers[scheme] = &FileDownloadHandler{}
 			break
 		case "ftp":
-			schemes[scheme] = &FtpDownloadHandler{}
+			handlers[scheme] = &FtpDownloadHandler{}
 			break
 		default:
 			break
@@ -68,19 +69,37 @@ func (dh *DownloadHandlers) getHandler(scheme string) DownloadHandler {
 
 	dhcls := dh.handlers[scheme]
 
-	//fv := reflect.ValueOf(NewDownloadHandlers)
-	//params := make([]reflect.Value,1)
-	//params[0] = "test"
-	// return fv.Call(params)
+	var downloadHandler DownloadHandler = nil
+	switch dhcls.(type) {
+	case *HttpDownloadHandler:
+		downloadHandler = &HttpDownloadHandler{}
+		break
+	case *FileDownloadHandler:
+		downloadHandler = &FileDownloadHandler{}
+		break
+	case *FtpDownloadHandler:
+		downloadHandler = &FtpDownloadHandler{}
+		break
+	default:
+		dh.notConfigured[scheme] = fmt.Sprintf("Loading download handler for scheme:[%s] not found", scheme)
+	}
 
-	return reflect.New(reflect.TypeOf(dhcls))
+	if downloadHandler != nil {
+		dh.handlers[scheme] = downloadHandler
+	}
+
+	return dh
 }
 
 func (dh *DownloadHandlers) DownloadRequest(request *request.Request, spider *spiders.Spider) chan interface{} {
-	scheme := ""
+	requestUrl, err := url.Parse(request.Url)
+	if err != nil {
+		panic(fmt.Sprintf("parse Url[%s] error", request.Url))
+	}
+	scheme := requestUrl.Scheme
 	handler := dh.getHandler(scheme)
 	if handler == nil {
-		errors.New("Unsupported URL scheme %s: %s")
+		errors.New(fmt.Sprintf("Unsupported URL scheme %s: %s", scheme, handler))
 	}
 
 	return handler.DownloadRequest(request, spider)

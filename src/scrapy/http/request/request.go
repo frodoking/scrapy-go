@@ -3,7 +3,7 @@ package request
 import "scrapy/http"
 
 type Request struct {
-	url        string
+	Url        string
 	encoding   string
 	method     string
 	headers    *http.Headers

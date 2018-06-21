@@ -128,10 +128,15 @@ func (d *Downloader) processQueue(spider *spiders.Spider, slot *Slot) {
 }
 
 func (d *Downloader) download(slot *Slot, req *request.Request, spider *spiders.Spider) chan interface{} {
+	slot.transferring[req] = true
 	newResult := make(chan interface{}, 1)
 	result := d.handlers.DownloadRequest(req, spider)
 	select {
 	case resp := <-result:
+		if reflect.TypeOf(resp).Name() == "Response" {
+			// Notify response_downloaded listeners about the recent download
+			// before querying queue for next request
+		}
 		delete(slot.transferring, req)
 		d.processQueue(spider, slot)
 		go func() {

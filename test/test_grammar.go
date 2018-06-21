@@ -4,6 +4,7 @@ import (
 	"container/list"
 	"fmt"
 	"log"
+	"reflect"
 )
 
 type Animal interface {
@@ -146,6 +147,16 @@ func testClosure() []func() {
 	return s
 }
 
+func testReflect() {
+	fv := reflect.ValueOf(calc)
+	params := make([]reflect.Value, 3)
+	params[0] = reflect.ValueOf("////testReflect/////")
+	params[1] = reflect.ValueOf(3)
+	params[2] = reflect.ValueOf(4)
+	rs := fv.Call(params)
+	fmt.Println("result:", rs[0].Interface().(int)) //当然也可以直接是rs[0].Interface()
+}
+
 func main() {
 	testInterface()
 	testDeferCall()
@@ -167,4 +178,6 @@ func main() {
 	for _, f := range testClosure() {
 		f()
 	}
+
+	testReflect()
 }
