@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-type DownloaderSlot struct {
+type Slot struct {
 	concurrency    int
 	delay          float64
 	randomizeDelay bool
@@ -23,18 +23,18 @@ type DownloaderSlot struct {
 	laterCall      interface{}
 }
 
-func (ds *DownloaderSlot) freeTransferSlots() int {
+func (ds *Slot) freeTransferSlots() int {
 	return ds.concurrency - len(ds.transferring)
 }
 
-func (ds *DownloaderSlot) downloadDelay() float64 {
+func (ds *Slot) downloadDelay() float64 {
 	if ds.randomizeDelay {
 		return (rand.Float64() + 0.5) * ds.delay
 	}
 	return ds.delay
 }
 
-func (ds *DownloaderSlot) close() {
+func (ds *Slot) close() {
 
 }
 
@@ -46,7 +46,7 @@ type downloaderRequestDeferred struct {
 type Downloader struct {
 	settings          map[string]string
 	signals           string
-	slots             map[string]*DownloaderSlot
+	slots             map[string]*Slot
 	active            map[*request.Request]bool
 	handlers          *handlers.DownloadHandlers
 	totalConcurrency  uint8
@@ -95,7 +95,7 @@ func (d *Downloader) enqueueRequest(req *request.Request, spider *spiders.Spider
 	return callback
 }
 
-func (d *Downloader) processQueue(spider *spiders.Spider, slot *DownloaderSlot) {
+func (d *Downloader) processQueue(spider *spiders.Spider, slot *Slot) {
 	now := float64(time.Now().UnixNano())
 	delay := slot.downloadDelay()
 	if delay != 0 {
@@ -127,7 +127,7 @@ func (d *Downloader) processQueue(spider *spiders.Spider, slot *DownloaderSlot) 
 	}
 }
 
-func (d *Downloader) download(slot *DownloaderSlot, req *request.Request, spider *spiders.Spider) chan interface{} {
+func (d *Downloader) download(slot *Slot, req *request.Request, spider *spiders.Spider) chan interface{} {
 	newResult := make(chan interface{}, 1)
 	result := d.handlers.DownloadRequest(req, spider)
 	select {
@@ -141,6 +141,6 @@ func (d *Downloader) download(slot *DownloaderSlot, req *request.Request, spider
 	return newResult
 }
 
-func (d *Downloader) getSlot(req *request.Request, spider *spiders.Spider) (string, *DownloaderSlot) {
+func (d *Downloader) getSlot(req *request.Request, spider *spiders.Spider) (string, *Slot) {
 	return "", nil
 }

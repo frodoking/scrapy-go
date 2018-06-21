@@ -132,11 +132,19 @@ func (s *Scraper) scrapeNext(spider *spiders.Spider, slot *ScraperSlot) {
 	}
 }
 
-func (s *Scraper) scrape(resp *response.Response, req *request.Request, spider *spiders.Spider) {
+func (s *Scraper) scrape(resp *response.Response, req *request.Request, spider *spiders.Spider) chan interface{} {
+	dfd := s.scrape2(resp, req, spider)
 
+	return dfd
 }
 
 func (s *Scraper) scrape2(resp *response.Response, req *request.Request, spider *spiders.Spider) chan interface{} {
+	if resp == nil {
+		return nil
+	}
+}
+
+func (s *Scraper) CallSpider(resp *response.Response, req *request.Request, spider *spiders.Spider) {
 
 }
 

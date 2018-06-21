@@ -1,9 +1,12 @@
 package middleware
 
-import "scrapy/spiders"
+import (
+	"container/list"
+	"scrapy/spiders"
+)
 
 type MiddlewareManager struct {
-	middlewares []MiddlewareManager
+	middlewares *list.List
 	methods     map[string]string
 }
 

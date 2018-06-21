@@ -7,6 +7,12 @@ import (
 	"scrapy/spiders"
 )
 
+type Middleware interface {
+	ProcessRequest(request *request.Request, spider *spiders.Spider)
+	ProcessResponse(request *request.Request, response *response.Response, spider *spiders.Spider)
+	ProcessException(request *request.Request, exception interface{}, spider *spiders.Spider)
+}
+
 type DownloaderMiddlewareManager struct {
 	*middleware.MiddlewareManager
 }
