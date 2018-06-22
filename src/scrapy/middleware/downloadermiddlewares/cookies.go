@@ -11,8 +11,8 @@ type CookiesMiddleware struct {
 	*middleware.MiddlewareManager
 }
 
-func (cm *CookiesMiddleware) ProcessRequest(request *request.Request, spider *spiders.Spider) {
-
+func (cm *CookiesMiddleware) ProcessRequest(request *request.Request, spider *spiders.Spider) chan interface{} {
+	return nil
 }
 func (cm *CookiesMiddleware) ProcessResponse(request *request.Request, response response.Response, spider *spiders.Spider) {
 

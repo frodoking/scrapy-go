@@ -11,8 +11,8 @@ type RobotsTxtMiddleware struct {
 	*middleware.MiddlewareManager
 }
 
-func (cm *RobotsTxtMiddleware) ProcessRequest(request *request.Request, spider *spiders.Spider) {
-
+func (cm *RobotsTxtMiddleware) ProcessRequest(request *request.Request, spider *spiders.Spider) chan interface{} {
+	return nil
 }
 func (cm *RobotsTxtMiddleware) ProcessResponse(request *request.Request, response response.Response, spider *spiders.Spider) {
 

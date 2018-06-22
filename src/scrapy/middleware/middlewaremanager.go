@@ -6,8 +6,11 @@ import (
 )
 
 type MiddlewareManager struct {
-	middlewares *list.List
-	methods     map[string]string
+	Middlewares *list.List
+}
+
+func (mwm *MiddlewareManager) addMiddleware(mw interface{}) {
+	mwm.Middlewares.PushBack(mw)
 }
 
 func (m *MiddlewareManager) OpenSpider(spider *spiders.Spider) chan struct{} {

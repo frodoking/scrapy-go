@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"runtime"
 )
 
 type Animal interface {
@@ -161,6 +162,12 @@ func testReflect() {
 	fmt.Println("result:", rs[0].Interface().(int)) //当然也可以直接是rs[0].Interface()
 }
 
+func testFuncForPc(clazz interface{}) {
+	fmt.Println("------------")
+	fmt.Println(runtime.FuncForPC(reflect.ValueOf(clazz).Pointer()).Name())
+	fmt.Println("------------")
+}
+
 func main() {
 	testInterface()
 	testDeferCall()
@@ -184,4 +191,5 @@ func main() {
 	}
 
 	testReflect()
+	testFuncForPc(&cc{"cccccc"})
 }
