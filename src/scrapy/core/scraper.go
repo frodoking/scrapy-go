@@ -14,7 +14,7 @@ const (
 )
 
 type ResponseRequestDefer struct {
-	Resp  *response.Response
+	Resp  response.Response
 	Req   *request.Request
 	Defer chan interface{}
 }
@@ -35,12 +35,12 @@ func NewScraperSlot(maxActiveSize uint) *ScraperSlot {
 	return &ScraperSlot{maxActiveSize, make([]*ResponseRequestDefer, 10), make(map[*request.Request]bool), 0, 0, nil}
 }
 
-func (ss *ScraperSlot) AddResponseRequest(resp *response.Response, req *request.Request) chan interface{} {
+func (ss *ScraperSlot) AddResponseRequest(resp response.Response, req *request.Request) chan interface{} {
 	deferred := make(chan interface{})
 	ss.queue = append(ss.queue, &ResponseRequestDefer{resp, req, deferred})
 
 	if reflect.TypeOf(resp).Name() == "Response" {
-		max := len(resp.Body)
+		max := len(resp.Body())
 		if max < MinResponseSize {
 			max = MinResponseSize
 		}
@@ -58,10 +58,10 @@ func (ss *ScraperSlot) NextResponseRequestDeferred() *ResponseRequestDefer {
 	return defered
 }
 
-func (ss *ScraperSlot) FinishResponse(resp *response.Response, req *request.Request) {
+func (ss *ScraperSlot) FinishResponse(resp response.Response, req *request.Request) {
 	delete(ss.active, req)
 	if reflect.TypeOf(resp).Name() == "Response" {
-		max := len(resp.Body)
+		max := len(resp.Body())
 		if max < MinResponseSize {
 			max = MinResponseSize
 		}
@@ -110,7 +110,7 @@ func (s *Scraper) checkIfClosing(spider *spiders.Spider, slot *ScraperSlot) {
 	}
 }
 
-func (s *Scraper) EnqueueScrape(resp *response.Response, req *request.Request, spider *spiders.Spider) chan interface{} {
+func (s *Scraper) EnqueueScrape(resp response.Response, req *request.Request, spider *spiders.Spider) chan interface{} {
 	slot := s.slot
 	result := slot.AddResponseRequest(resp, req)
 
@@ -132,26 +132,27 @@ func (s *Scraper) scrapeNext(spider *spiders.Spider, slot *ScraperSlot) {
 	}
 }
 
-func (s *Scraper) scrape(resp *response.Response, req *request.Request, spider *spiders.Spider) chan interface{} {
+func (s *Scraper) scrape(resp response.Response, req *request.Request, spider *spiders.Spider) chan interface{} {
 	dfd := s.scrape2(resp, req, spider)
 
 	return dfd
 }
 
-func (s *Scraper) scrape2(resp *response.Response, req *request.Request, spider *spiders.Spider) chan interface{} {
+func (s *Scraper) scrape2(resp response.Response, req *request.Request, spider *spiders.Spider) chan interface{} {
 	if resp == nil {
 		return nil
 	}
+	return nil
 }
 
-func (s *Scraper) CallSpider(resp *response.Response, req *request.Request, spider *spiders.Spider) {
-
-}
-
-func (s *Scraper) HandleSpiderError(failure string, resp *response.Response, req *request.Request, spider *spiders.Spider) {
+func (s *Scraper) CallSpider(resp response.Response, req *request.Request, spider *spiders.Spider) {
 
 }
 
-func (s *Scraper) HandleSpiderOutput(result string, resp *response.Response, req *request.Request, spider *spiders.Spider) {
+func (s *Scraper) HandleSpiderError(failure string, resp response.Response, req *request.Request, spider *spiders.Spider) {
+
+}
+
+func (s *Scraper) HandleSpiderOutput(result string, resp response.Response, req *request.Request, spider *spiders.Spider) {
 
 }

@@ -2,7 +2,6 @@ package core
 
 import (
 	"container/list"
-	"go/types"
 	"reflect"
 	"scrapy/core/downloader"
 	"scrapy/crawler"
@@ -13,7 +12,7 @@ import (
 
 type EngineSlot struct {
 	closing       bool
-	inProgress    map[request.Request]bool
+	inProgress    map[*request.Request]bool
 	startRequests *list.List
 	closeIfIdle   bool
 	scheduler     *Scheduler
@@ -82,7 +81,7 @@ func (ee *ExecutionEngine) Schedule(req request.Request, spider spiders.Spider) 
 
 }
 
-func (ee *ExecutionEngine) Download(req request.Request, spider spiders.Spider) *response.Response {
+func (ee *ExecutionEngine) Download(req request.Request, spider spiders.Spider) response.Response {
 	return nil
 }
 
@@ -115,7 +114,7 @@ func (ee *ExecutionEngine) nextRequestFromScheduler(spider *spiders.Spider) chan
 	}
 	result := ee.download(req, spider)
 
-	ee.handleDownloaderOutput((<-result).(*response.Response), req, spider)
+	ee.handleDownloaderOutput((<-result).(response.Response), req, spider)
 	return result
 }
 
@@ -126,7 +125,7 @@ func (ee *ExecutionEngine) download(req *request.Request, spider *spiders.Spider
 	return ee.downloader.Fetch(req, spider)
 }
 
-func (ee *ExecutionEngine) handleDownloaderOutput(resp *response.Response, req *request.Request, spider *spiders.Spider) interface{} {
+func (ee *ExecutionEngine) handleDownloaderOutput(resp response.Response, req *request.Request, spider *spiders.Spider) interface{} {
 	if reflect.TypeOf(resp).Name() == "Request" {
 		ee.Crawl(req, spider)
 		return nil

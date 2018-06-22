@@ -14,7 +14,7 @@ type RobotsTxtMiddleware struct {
 func (cm *RobotsTxtMiddleware) ProcessRequest(request *request.Request, spider *spiders.Spider) {
 
 }
-func (cm *RobotsTxtMiddleware) ProcessResponse(request *request.Request, response *response.Response, spider *spiders.Spider) {
+func (cm *RobotsTxtMiddleware) ProcessResponse(request *request.Request, response response.Response, spider *spiders.Spider) {
 
 }
 func (cm *RobotsTxtMiddleware) ProcessException(request *request.Request, exception interface{}, spider *spiders.Spider) {

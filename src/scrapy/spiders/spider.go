@@ -43,13 +43,13 @@ func (s *Spider) MakeRequestsFromUrl(url string) *request.Request {
 	return request.NewRequest(url, "utf-8")
 }
 
-func (s *Spider) Parse(response *response.Response) {
+func (s *Spider) Parse(response response.Response) {
 }
 
 func (s *Spider) UpdateSettings(settings *settings.Settings) {
 	settings.Set("", "")
 }
 
-func (s *Spider) HandlesRequest(request request.Request) interface{} {
+func (s *Spider) HandlesRequest(request *request.Request) interface{} {
 	return nil
 }

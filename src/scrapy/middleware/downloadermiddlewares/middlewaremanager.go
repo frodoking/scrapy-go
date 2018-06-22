@@ -9,7 +9,7 @@ import (
 
 type Middleware interface {
 	ProcessRequest(request *request.Request, spider *spiders.Spider)
-	ProcessResponse(request *request.Request, response *response.Response, spider *spiders.Spider)
+	ProcessResponse(request *request.Request, response response.Response, spider *spiders.Spider)
 	ProcessException(request *request.Request, exception interface{}, spider *spiders.Spider)
 }
 
@@ -21,7 +21,7 @@ func (m *DownloaderMiddlewareManager) Download(downloadFunc interface{}, request
 	result := make(chan interface{})
 
 	go func() {
-		result <- &response.Response{}
+		result <- response.NewResponse(request.Url)
 	}()
 
 	return result

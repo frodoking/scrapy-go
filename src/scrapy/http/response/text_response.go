@@ -1,7 +1,7 @@
 package response
 
 type TEXTResponse struct {
-	*Response
+	*BaseResponse
 }
 
 func (r *TEXTResponse) Xpath() interface{} {

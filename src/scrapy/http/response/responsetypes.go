@@ -2,6 +2,7 @@ package response
 
 import (
 	"container/list"
+	"scrapy/http"
 )
 
 var Classes = map[string]string{
@@ -22,12 +23,12 @@ var Classes = map[string]string{
 }
 
 type ResponseTypes struct {
-	classes   map[string]interface{}
+	classes   map[string]Response
 	mimeTypes *list.List
 }
 
 func NewResponseTypes() *ResponseTypes {
-	classes := make(map[string]interface{})
+	classes := make(map[string]Response)
 	for mimeType, class := range Classes {
 		switch class {
 		case "TextResponse":
@@ -40,34 +41,36 @@ func NewResponseTypes() *ResponseTypes {
 			classes[mimeType] = &XMLResponse{}
 			break
 		default:
-			classes[mimeType] = &Response{}
+			classes[mimeType] = NewResponse("")
 			break
 		}
 	}
 	return &ResponseTypes{classes, list.New()}
 }
 
-func (rt *ResponseTypes) FromMimeType(mimeType string) interface{} {
+func (rt *ResponseTypes) FromMimeType(mimeType string) Response {
 	if mimeType == "" {
-		return &Response{}
+		return NewResponse("")
 	}
 
 	if value, ok := rt.classes[mimeType]; ok {
 		return value
 	}
 
-	return &Response{}
+	return NewResponse("")
 }
 
-func (rt *ResponseTypes) FromContentType(contentType string, contentEncoding string) interface{} {
+func (rt *ResponseTypes) FromContentType(contentType string, contentEncoding string) Response {
 	mimeType := ""
 	return rt.FromMimeType(mimeType)
 }
 
-func (rt *ResponseTypes) FromHeaders(headers map[string]interface{}) interface{} {
-	return &Response{}
+func (rt *ResponseTypes) FromHeaders(headers *http.Headers) Response {
+	return NewResponse("")
 }
 
-func (rt *ResponseTypes) FromBody(body interface{}) interface{} {
-	return &Response{}
+func (rt *ResponseTypes) FromBody(body interface{}) Response {
+	return NewResponse("")
 }
+
+var ScrapyResponseTypes = NewResponseTypes()

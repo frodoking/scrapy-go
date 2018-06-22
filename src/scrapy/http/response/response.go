@@ -3,53 +3,74 @@ package response
 import "scrapy/http"
 import "scrapy/http/request"
 
-type Response struct {
+type Response interface {
+	Url() string
+	Body() []byte
+	Meta() map[string]interface{}
+	Copy()
+	Replace()
+	UrlJoin(url string)
+	Text() string
+	CSS() string
+	XPath(args []string, kwargs []string) interface{}
+	Follow() *request.Request
+}
+
+type BaseResponse struct {
 	url     string
 	headers *http.Headers
 	status  int
-	Body    []byte
+	body    []byte
 	Request *request.Request
 	flags   []string
 }
 
-func NewResponse(url string) *Response {
-	response := &Response{}
+func NewResponse(url string) *BaseResponse {
+	response := &BaseResponse{}
 	response.url = url
 	response.status = 200
 	response.headers = http.NewHeaders(make(map[string]interface{}))
-	response.Body = make([]byte, 0)
+	response.body = make([]byte, 0)
 	response.flags = make([]string, 0)
 	return response
 }
 
-func (r *Response) Meta() map[string]interface{} {
+func (r *BaseResponse) Url() string {
+	return r.url
+}
+
+func (r *BaseResponse) Meta() map[string]interface{} {
 	return r.Request.Meta
 }
 
-func (r *Response) Copy() {
+func (r *BaseResponse) Body() []byte {
+	return r.body
+}
+
+func (r *BaseResponse) Copy() {
 	r.Replace()
 }
 
-func (r *Response) Replace() {
+func (r *BaseResponse) Replace() {
 
 }
 
-func (r *Response) UrlJoin(url string) {
+func (r *BaseResponse) UrlJoin(url string) {
 
 }
 
-func (r *Response) Text() string {
+func (r *BaseResponse) Text() string {
 	return ""
 }
 
-func (r *Response) CSS() string {
+func (r *BaseResponse) CSS() string {
 	return ""
 }
 
-func (r *Response) XPath(args []string, kwargs []string) interface{} {
+func (r *BaseResponse) XPath(args []string, kwargs []string) interface{} {
 	return nil
 }
 
-func (r *Response) Follow() *request.Request {
+func (r *BaseResponse) Follow() *request.Request {
 	return nil
 }
