@@ -4,10 +4,10 @@ import (
 	"container/list"
 	"reflect"
 	"scrapy/core/downloader"
-	"scrapy/crawler"
 	"scrapy/http/request"
 	"scrapy/http/response"
 	"scrapy/spiders"
+	"scrapy/settings"
 )
 
 type EngineSlot struct {
@@ -35,18 +35,18 @@ func (es *EngineSlot) Close() {
 }
 
 type ExecutionEngine struct {
-	crawler    *crawler.Crawler
+	settings *settings.Settings
 	scheduler  *Scheduler
 	slot       *EngineSlot
-	spider     *spiders.Spider
+	spider     spiders.Spider
 	running    bool
 	paused     bool
 	downloader *downloader.Downloader
 	scraper    *Scraper
 }
 
-func NewExecutionEngine(crawler *crawler.Crawler) *ExecutionEngine {
-	return &ExecutionEngine{crawler: crawler, scraper: &Scraper{}}
+func NewExecutionEngine(settings *settings.Settings) *ExecutionEngine {
+	return &ExecutionEngine{settings: settings, scraper: NewScraper(settings)}
 }
 
 func (ee *ExecutionEngine) Start() {
@@ -73,7 +73,7 @@ func (ee *ExecutionEngine) SpiderIsIdle(spider spiders.Spider) bool {
 	return true
 }
 
-func (ee *ExecutionEngine) Crawl(req *request.Request, spider *spiders.Spider) {
+func (ee *ExecutionEngine) Crawl(req *request.Request, spider spiders.Spider) {
 
 }
 
@@ -85,8 +85,8 @@ func (ee *ExecutionEngine) Download(req request.Request, spider spiders.Spider) 
 	return nil
 }
 
-func (ee *ExecutionEngine) OpenSpider(spider *spiders.Spider, startRequests *list.List, closeIfIdle bool) {
-	scheduler := NewScheduler(ee.crawler)
+func (ee *ExecutionEngine) OpenSpider(spider spiders.Spider, startRequests *list.List, closeIfIdle bool) {
+	scheduler := NewScheduler(ee.settings)
 	startRequests = ee.scraper.spidermw.ProcessStartRequests(startRequests, spider)
 	slot := NewSlot(startRequests, closeIfIdle, scheduler)
 	ee.slot = slot
@@ -95,18 +95,18 @@ func (ee *ExecutionEngine) OpenSpider(spider *spiders.Spider, startRequests *lis
 	go ee.scraper.OpenSpider(spider)
 }
 
-func (ee *ExecutionEngine) CloseSpider(spider *spiders.Spider, reason string) (bool, error) {
+func (ee *ExecutionEngine) CloseSpider(spider spiders.Spider, reason string) (bool, error) {
 	if reason == "" {
 		reason = "cancelled"
 	}
 	return true, nil
 }
 
-func (ee *ExecutionEngine) nextRequest(spider *spiders.Spider) *request.Request {
+func (ee *ExecutionEngine) nextRequest(spider spiders.Spider) *request.Request {
 	return nil
 }
 
-func (ee *ExecutionEngine) nextRequestFromScheduler(spider *spiders.Spider) chan interface{} {
+func (ee *ExecutionEngine) nextRequestFromScheduler(spider spiders.Spider) chan interface{} {
 	slot := ee.slot
 	req := slot.scheduler.NextRequest()
 	if req == nil {
@@ -118,14 +118,14 @@ func (ee *ExecutionEngine) nextRequestFromScheduler(spider *spiders.Spider) chan
 	return result
 }
 
-func (ee *ExecutionEngine) download(req *request.Request, spider *spiders.Spider) chan interface{} {
+func (ee *ExecutionEngine) download(req *request.Request, spider spiders.Spider) chan interface{} {
 	slot := ee.slot
 	slot.AddRequest(req)
 
 	return ee.downloader.Fetch(req, spider)
 }
 
-func (ee *ExecutionEngine) handleDownloaderOutput(resp response.Response, req *request.Request, spider *spiders.Spider) interface{} {
+func (ee *ExecutionEngine) handleDownloaderOutput(resp response.Response, req *request.Request, spider spiders.Spider) interface{} {
 	if reflect.TypeOf(resp).Name() == "Request" {
 		ee.Crawl(req, spider)
 		return nil

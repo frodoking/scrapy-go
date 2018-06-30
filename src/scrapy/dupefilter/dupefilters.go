@@ -32,7 +32,7 @@ func NewRFPDupeFilter(settings *settings.Settings) *RFPDupeFilter {
 	}
 	fingerprints := make(map[string]bool)
 
-	return &RFPDupeFilter{nil, fingerprints, true, debug}
+	return &RFPDupeFilter{"", fingerprints, true, debug}
 }
 
 func (f *RFPDupeFilter) RequestSeen(request *request.Request) {

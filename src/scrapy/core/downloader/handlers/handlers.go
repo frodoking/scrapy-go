@@ -19,7 +19,7 @@ var Classes = map[string]string{
 
 type DownloadHandler interface {
 	// return real response to chan
-	DownloadRequest(request *request.Request, spider *spiders.Spider) chan interface{}
+	DownloadRequest(request *request.Request, spider spiders.Spider) chan interface{}
 }
 
 type DownloadHandlers struct {
@@ -91,7 +91,7 @@ func (dh *DownloadHandlers) getHandler(scheme string) DownloadHandler {
 	return dh
 }
 
-func (dh *DownloadHandlers) DownloadRequest(request *request.Request, spider *spiders.Spider) chan interface{} {
+func (dh *DownloadHandlers) DownloadRequest(request *request.Request, spider spiders.Spider) chan interface{} {
 	requestUrl, err := url.Parse(request.Url)
 	if err != nil {
 		panic(fmt.Sprintf("parse Url[%s] error", request.Url))

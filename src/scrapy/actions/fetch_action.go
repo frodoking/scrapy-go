@@ -33,6 +33,7 @@ func (c *FetchAction) Run(args []string, opts []string) {
 	var spidercls = spiders.NewDefaultSpider()
 	var spiderLoader = c.crawlerProcess
 
+	println(request, spidercls, spiderLoader)
 }
 
 func checkUrl(url string) bool {

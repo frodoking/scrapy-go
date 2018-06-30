@@ -1,11 +1,11 @@
 package core
 
 import (
-	"scrapy/crawler"
 	"scrapy/dupefilter"
 	"scrapy/http/request"
 	"scrapy/spiders"
 	"strconv"
+	"scrapy/settings"
 )
 
 type Scheduler struct {
@@ -18,18 +18,18 @@ type Scheduler struct {
 	stats    uint8
 }
 
-func NewScheduler(crawler *crawler.Crawler) *Scheduler {
-	df := dupefilter.NewRFPDupeFilter(crawler.Settings)
+func NewScheduler(settings *settings.Settings) *Scheduler {
+	df := dupefilter.NewRFPDupeFilter(settings)
 	//pqclass := crawler.Settings.Get("SCHEDULER_PRIORITY_QUEUE")
 	//dqclass := crawler.Settings.Get("SCHEDULER_DISK_QUEUE")
 	//mqclass := crawler.Settings.Get("SCHEDULER_MEMORY_QUEUE")
-	debugString := crawler.Settings.Get("SCHEDULER_DEBUG")
+	debugString := settings.Get("SCHEDULER_DEBUG")
 	debug, err := strconv.ParseBool(debugString)
 	if err != nil {
 		debug = false
 	}
 
-	logunserString := crawler.Settings.Get("LOG_UNSERIALIZABLE_REQUESTS")
+	logunserString := settings.Get("LOG_UNSERIALIZABLE_REQUESTS")
 	logunser, err := strconv.ParseBool(logunserString)
 	if err != nil {
 		logunser = false
@@ -37,14 +37,14 @@ func NewScheduler(crawler *crawler.Crawler) *Scheduler {
 		logunser = debug
 	}
 
-	return &Scheduler{df, nil, nil, nil, nil, logunser, 1}
+	return &Scheduler{df, "", nil, nil, nil, logunser, 1}
 }
 
 func (s *Scheduler) HasPendingRequests() bool {
 	return false
 }
 
-func (s *Scheduler) Open(spider *spiders.Spider) chan string {
+func (s *Scheduler) Open(spider spiders.Spider) chan string {
 	return s.df.Open()
 }
 

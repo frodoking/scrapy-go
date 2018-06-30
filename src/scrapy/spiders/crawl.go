@@ -4,5 +4,5 @@ type Rule struct {
 }
 
 type CrawlSpider struct {
-	Spider
+	*DefaultSpider
 }

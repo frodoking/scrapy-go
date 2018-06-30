@@ -5,7 +5,6 @@ import (
 	"math/rand"
 	"reflect"
 	"scrapy/core/downloader/handlers"
-	"scrapy/crawler"
 	"scrapy/http/request"
 	"scrapy/middleware/downloadermiddlewares"
 	"scrapy/spiders"
@@ -48,15 +47,15 @@ type Downloader struct {
 	signals           string
 	slots             map[string]*Slot
 	active            map[*request.Request]bool
-	handlers          *handlers.DownloadHandlers
+	handlers          *handlers.DownloadHandlers              `获取指定url数据的真正执行者`
 	totalConcurrency  uint8
 	domainConcurrency uint8
 	ipConcurrency     uint8
 	randomizeDelay    bool
-	middleware        *middleware.DownloaderMiddlewareManager
+	middleware        *middleware.DownloaderMiddlewareManager `downloader中间件`
 }
 
-func NewDownloader(crawler *crawler.Crawler) *Downloader {
+func NewDownloader() *Downloader {
 	handlers := handlers.NewDownloadHandlers()
 	middleware := &middleware.DownloaderMiddlewareManager{}
 
@@ -65,17 +64,23 @@ func NewDownloader(crawler *crawler.Crawler) *Downloader {
 	return downloader
 }
 
-func (d *Downloader) Fetch(req *request.Request, spider *spiders.Spider) chan interface{} {
+func (d *Downloader) Fetch(req *request.Request, spider spiders.Spider) chan interface{} {
+	d.active[req] = true
+	_, err := d.middleware.Download(req, spider)
+	if err != nil {
+
+	} else {
+		d.enqueueRequest(req, spider)
+	}
 	delete(d.active, req)
-	result := d.middleware.Download(d.enqueueRequest, req, spider)
-	return result
+	return nil
 }
 
 func (d *Downloader) NeedsBackout() bool {
 	return false
 }
 
-func (d *Downloader) enqueueRequest(req *request.Request, spider *spiders.Spider) chan interface{} {
+func (d *Downloader) enqueueRequest(req *request.Request, spider spiders.Spider) chan interface{} {
 	key, slot := d.getSlot(req, spider)
 	req.Meta["download_slot"] = key
 
@@ -92,16 +97,18 @@ func (d *Downloader) enqueueRequest(req *request.Request, spider *spiders.Spider
 
 	slot.queue.PushBack(&downloaderRequestDeferred{req, callback})
 
+	d.processQueue(spider, slot)
+
 	return callback
 }
 
-func (d *Downloader) processQueue(spider *spiders.Spider, slot *Slot) {
+func (d *Downloader) processQueue(spider spiders.Spider, slot *Slot) {
 	now := float64(time.Now().UnixNano())
 	delay := slot.downloadDelay()
 	if delay != 0 {
 		penalty := delay - now + slot.LastSeen
 		if penalty > 0 {
-			time.AfterFunc(penalty*time.Millisecond, func() {
+			time.AfterFunc(time.Duration(penalty)*time.Millisecond, func() {
 				d.processQueue(spider, slot)
 			})
 			return
@@ -127,7 +134,7 @@ func (d *Downloader) processQueue(spider *spiders.Spider, slot *Slot) {
 	}
 }
 
-func (d *Downloader) download(slot *Slot, req *request.Request, spider *spiders.Spider) chan interface{} {
+func (d *Downloader) download(slot *Slot, req *request.Request, spider spiders.Spider) chan interface{} {
 	slot.transferring[req] = true
 	newResult := make(chan interface{}, 1)
 	result := d.handlers.DownloadRequest(req, spider)
@@ -146,6 +153,6 @@ func (d *Downloader) download(slot *Slot, req *request.Request, spider *spiders.
 	return newResult
 }
 
-func (d *Downloader) getSlot(req *request.Request, spider *spiders.Spider) (string, *Slot) {
+func (d *Downloader) getSlot(req *request.Request, spider spiders.Spider) (string, *Slot) {
 	return "", nil
 }

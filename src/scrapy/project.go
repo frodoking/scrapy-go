@@ -6,6 +6,6 @@ func InsideProject() bool {
 	return true
 }
 
-func GetProjectSettings() *settings.CrawlerSettings {
+func GetProjectSettings() *settings.Settings {
 	return nil
 }

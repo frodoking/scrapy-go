@@ -1,4 +1,4 @@
-package crawler
+package common
 
 import (
 	"fmt"
@@ -8,8 +8,8 @@ import (
 )
 
 type Crawler struct {
-	spider   *spiders.Spider
-	Settings *settings.CrawlerSettings
+	spider   spiders.Spider
+	Settings *settings.Settings
 	engine   *core.ExecutionEngine
 	crawling bool
 }
@@ -30,16 +30,16 @@ func (c *Crawler) Stop() {
 
 }
 
-func (c *Crawler) createSpider() *spiders.Spider {
+func (c *Crawler) createSpider() spiders.Spider {
 	return nil
 }
 
 func (c *Crawler) createEngine() *core.ExecutionEngine {
-	return core.NewExecutionEngine(c)
+	return core.NewExecutionEngine(c.Settings)
 }
 
 type CrawlerRunner struct {
-	Settings *settings.CrawlerSettings
+	Settings *settings.Settings
 	crawlers []*Crawler
 	aa       string
 }
@@ -69,7 +69,7 @@ func (cr *CrawlerRunner) createCrawler(spiderCls interface{}) *Crawler {
 	if ok {
 		spiderCls = nil
 	}
-	return &Crawler{spider: spiderCls.(*spiders.Spider), Settings: cr.Settings}
+	return &Crawler{spider: spiderCls.(spiders.Spider), Settings: cr.Settings}
 }
 
 func (cr *CrawlerRunner) Stop() {

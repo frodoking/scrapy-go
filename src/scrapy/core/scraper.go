@@ -2,11 +2,11 @@ package core
 
 import (
 	"reflect"
-	"scrapy/crawler"
 	"scrapy/http/request"
 	"scrapy/http/response"
 	"scrapy/middleware/spidermiddlewares"
 	"scrapy/spiders"
+	"scrapy/settings"
 )
 
 const (
@@ -20,7 +20,7 @@ type ResponseRequestDefer struct {
 }
 
 type ScraperSlot struct {
-	maxActiveSize uint
+	maxActiveSize int
 	queue         []*ResponseRequestDefer
 	active        map[*request.Request]bool
 	activeSize    int
@@ -28,7 +28,7 @@ type ScraperSlot struct {
 	closing       chan interface{}
 }
 
-func NewScraperSlot(maxActiveSize uint) *ScraperSlot {
+func NewScraperSlot(maxActiveSize int) *ScraperSlot {
 	if maxActiveSize == -1 {
 		maxActiveSize = 5000000
 	}
@@ -80,20 +80,20 @@ type Scraper struct {
 	spidermw        *middleware.SpiderMiddlewareManager
 	itemProc        interface{}
 	concurrentItems interface{}
-	crawler         *crawler.Crawler
+	settings *settings.Settings
 }
 
-func NewScraper(crawler *crawler.Crawler) {
-
+func NewScraper(settings *settings.Settings) *Scraper {
+	return &Scraper{settings:settings}
 }
 
-func (s *Scraper) OpenSpider(spider *spiders.Spider) {
+func (s *Scraper) OpenSpider(spider spiders.Spider) {
 	s.slot = NewScraperSlot(-1)
 
 	//itemProc := utils.LoadObject(s.crawler.Settings.Get("ITEM_PROCESSOR"))
 }
 
-func (s *Scraper) CloseSpider(spider *spiders.Spider) chan interface{} {
+func (s *Scraper) CloseSpider(spider spiders.Spider) chan interface{} {
 	slot := s.slot
 	slot.closing = make(chan interface{})
 	s.checkIfClosing(spider, slot)
@@ -104,13 +104,13 @@ func (s *Scraper) IsIdle() bool {
 	return s.slot == nil
 }
 
-func (s *Scraper) checkIfClosing(spider *spiders.Spider, slot *ScraperSlot) {
+func (s *Scraper) checkIfClosing(spider spiders.Spider, slot *ScraperSlot) {
 	if <-slot.closing != nil && slot.IsIdle() {
 
 	}
 }
 
-func (s *Scraper) EnqueueScrape(resp response.Response, req *request.Request, spider *spiders.Spider) chan interface{} {
+func (s *Scraper) EnqueueScrape(resp response.Response, req *request.Request, spider spiders.Spider) chan interface{} {
 	slot := s.slot
 	result := slot.AddResponseRequest(resp, req)
 
@@ -125,34 +125,35 @@ func (s *Scraper) EnqueueScrape(resp response.Response, req *request.Request, sp
 	return result
 }
 
-func (s *Scraper) scrapeNext(spider *spiders.Spider, slot *ScraperSlot) {
+func (s *Scraper) scrapeNext(spider spiders.Spider, slot *ScraperSlot) {
 	for _, defered := range slot.queue {
+		println(defered)
 		nextDeferred := slot.NextResponseRequestDeferred()
 		s.scrape(nextDeferred.Resp, nextDeferred.Req, spider)
 	}
 }
 
-func (s *Scraper) scrape(resp response.Response, req *request.Request, spider *spiders.Spider) chan interface{} {
+func (s *Scraper) scrape(resp response.Response, req *request.Request, spider spiders.Spider) chan interface{} {
 	dfd := s.scrape2(resp, req, spider)
 
 	return dfd
 }
 
-func (s *Scraper) scrape2(resp response.Response, req *request.Request, spider *spiders.Spider) chan interface{} {
+func (s *Scraper) scrape2(resp response.Response, req *request.Request, spider spiders.Spider) chan interface{} {
 	if resp == nil {
 		return nil
 	}
 	return nil
 }
 
-func (s *Scraper) CallSpider(resp response.Response, req *request.Request, spider *spiders.Spider) {
+func (s *Scraper) CallSpider(resp response.Response, req *request.Request, spider spiders.Spider) {
 
 }
 
-func (s *Scraper) HandleSpiderError(failure string, resp response.Response, req *request.Request, spider *spiders.Spider) {
+func (s *Scraper) HandleSpiderError(failure string, resp response.Response, req *request.Request, spider spiders.Spider) {
 
 }
 
-func (s *Scraper) HandleSpiderOutput(result string, resp response.Response, req *request.Request, spider *spiders.Spider) {
+func (s *Scraper) HandleSpiderOutput(result string, resp response.Response, req *request.Request, spider spiders.Spider) {
 
 }

@@ -1,6 +1,8 @@
 package request
 
-import "scrapy/http"
+import (
+	"scrapy/http"
+)
 
 type Request struct {
 	Url        string
@@ -13,13 +15,13 @@ type Request struct {
 	priority   int
 	dontFilter bool
 	flags      []string
-	callback   interface{}
-	errorBack  interface{}
+	callback   func(response interface{})
+	errorBack  func(err error)
 }
 
 func NewRequest(url string, encoding string) *Request {
 	request := &Request{}
-	request.url = url
+	request.Url = url
 	request.callback = nil
 	request.method = "GET"
 	request.encoding = encoding

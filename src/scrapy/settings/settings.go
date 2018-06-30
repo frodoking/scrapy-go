@@ -21,12 +21,8 @@ type Settings struct {
 	*BaseSettings
 }
 
-type CrawlerSettings struct {
-	*Settings
-	settingsModule string
-}
 
-func NewCrawlerSettings() *CrawlerSettings {
-	settings := &CrawlerSettings{}
+func NewSettings() *Settings {
+	settings := &Settings{}
 	return settings
 }

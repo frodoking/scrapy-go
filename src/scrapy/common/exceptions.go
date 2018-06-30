@@ -1,4 +1,4 @@
-package scrapy
+package common
 
 // Indicates a missing configuration situation
 type NotConfigured struct {
