@@ -3,8 +3,8 @@ package scrapy
 import (
 	"os"
 	"scrapy/actions"
+	"scrapy/core"
 	"scrapy/settings"
-	"scrapy/common"
 )
 
 type Scrapy struct {
@@ -25,7 +25,7 @@ func (s *Scrapy) Execute(argv []string, mSettings *settings.Settings) {
 
 	crawlAction := &actions.CrawlAction{ScrapyAction: actions.ScrapyAction{Name: "", RequiresProject: false}}
 	crawlAction.Settings = mSettings
-	crawlAction.CrawlerProcess = common.NewCrawlerProcess()
+	crawlAction.CrawlerProcess = core.NewCrawlerProcess()
 
 	go crawlAction.Run(argv, nil)
 }

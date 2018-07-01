@@ -21,7 +21,6 @@ type Settings struct {
 	*BaseSettings
 }
 
-
 func NewSettings() *Settings {
 	settings := &Settings{}
 	return settings

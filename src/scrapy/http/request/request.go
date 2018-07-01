@@ -13,7 +13,7 @@ type Request struct {
 	cookies    *http.Cookies
 	Meta       map[string]interface{}
 	priority   int
-	dontFilter bool
+	DontFilter bool
 	flags      []string
 	callback   func(response interface{})
 	errorBack  func(err error)
@@ -30,7 +30,7 @@ func NewRequest(url string, encoding string) *Request {
 	request.cookies = nil
 	request.Meta = make(map[string]interface{})
 	request.priority = 0
-	request.dontFilter = false
+	request.DontFilter = false
 	request.errorBack = nil
 	request.flags = make([]string, 0)
 	return request

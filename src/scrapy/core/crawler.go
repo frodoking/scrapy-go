@@ -1,8 +1,7 @@
-package common
+package core
 
 import (
 	"fmt"
-	"scrapy/core"
 	"scrapy/settings"
 	"scrapy/spiders"
 )
@@ -10,7 +9,7 @@ import (
 type Crawler struct {
 	spider   spiders.Spider
 	Settings *settings.Settings
-	engine   *core.ExecutionEngine
+	engine   *ExecutionEngine
 	crawling bool
 }
 
@@ -34,8 +33,8 @@ func (c *Crawler) createSpider() spiders.Spider {
 	return nil
 }
 
-func (c *Crawler) createEngine() *core.ExecutionEngine {
-	return core.NewExecutionEngine(c.Settings)
+func (c *Crawler) createEngine() *ExecutionEngine {
+	return NewExecutionEngine(c.Settings)
 }
 
 type CrawlerRunner struct {

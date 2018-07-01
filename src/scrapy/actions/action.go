@@ -1,19 +1,19 @@
 package actions
 
 import (
+	"scrapy/core"
 	"scrapy/settings"
-	"scrapy/common"
 )
 
 type ScrapyAction struct {
 	Name            string
 	RequiresProject bool
-	CrawlerProcess  *common.CrawlerProcess
+	CrawlerProcess  *core.CrawlerProcess
 	Settings        *settings.Settings
-	crawler         *common.Crawler
+	crawler         *core.Crawler
 }
 
-func (c *ScrapyAction) SetCrawler(crawler *common.Crawler) {
+func (c *ScrapyAction) SetCrawler(crawler *core.Crawler) {
 	c.crawler = crawler
 }
 

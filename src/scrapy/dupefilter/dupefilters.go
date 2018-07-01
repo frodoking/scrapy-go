@@ -8,10 +8,10 @@ import (
 )
 
 type BaseDupeFilter interface {
-	RequestSeen(request *request.Request)
+	RequestSeen(request *request.Request) bool
 	Open() chan string
 	Close(reason string) chan string
-	Log(request *request.Request, spider *spiders.Spider) chan string
+	Log(request *request.Request, spider spiders.Spider) chan string
 }
 
 /**
@@ -35,8 +35,8 @@ func NewRFPDupeFilter(settings *settings.Settings) *RFPDupeFilter {
 	return &RFPDupeFilter{"", fingerprints, true, debug}
 }
 
-func (f *RFPDupeFilter) RequestSeen(request *request.Request) {
-
+func (f *RFPDupeFilter) RequestSeen(request *request.Request) bool {
+	return false
 }
 
 func (f *RFPDupeFilter) Open() chan string {
@@ -51,7 +51,7 @@ func (f *RFPDupeFilter) Close(reason string) chan string {
 	return defered
 }
 
-func (f *RFPDupeFilter) Log(request *request.Request, spider *spiders.Spider) chan string {
+func (f *RFPDupeFilter) Log(request *request.Request, spider spiders.Spider) chan string {
 	defered := make(chan string, 1)
 
 	return defered

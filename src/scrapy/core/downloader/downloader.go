@@ -47,7 +47,7 @@ type Downloader struct {
 	signals           string
 	slots             map[string]*Slot
 	active            map[*request.Request]bool
-	handlers          *handlers.DownloadHandlers              `获取指定url数据的真正执行者`
+	handlers          *handlers.DownloadHandlers `获取指定url数据的真正执行者`
 	totalConcurrency  uint8
 	domainConcurrency uint8
 	ipConcurrency     uint8

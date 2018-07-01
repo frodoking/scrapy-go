@@ -13,32 +13,30 @@ type FilesPipeline struct {
 	*MediaPipeline
 }
 
-
-func (mp *FilesPipeline) MediaToDownload()  {
-
-}
-
-func (mp *FilesPipeline) GetMediaRequests()  {
+func (mp *FilesPipeline) MediaToDownload() {
 
 }
 
-func (mp *FilesPipeline) MediaDownloaded()  {
+func (mp *FilesPipeline) GetMediaRequests() {
 
 }
 
-func (mp *FilesPipeline) MediaFailed()  {
+func (mp *FilesPipeline) MediaDownloaded() {
 
 }
 
-func (mp *FilesPipeline) ItemCompleted()  {
+func (mp *FilesPipeline) MediaFailed() {
 
 }
 
-func (mp *FilesPipeline) FileDownloaded()  {
+func (mp *FilesPipeline) ItemCompleted() {
 
 }
 
-func (mp *FilesPipeline) FilePath()  {
+func (mp *FilesPipeline) FileDownloaded() {
 
 }
 
+func (mp *FilesPipeline) FilePath() {
+
+}

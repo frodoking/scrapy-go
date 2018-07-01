@@ -7,7 +7,6 @@ import (
 )
 
 type Spider interface {
-
 	StartRequests() *list.List
 
 	MakeRequestsFromUrl(url string) *request.Request
@@ -15,5 +14,4 @@ type Spider interface {
 	Parse(response response.Response)
 
 	HandlesRequest(request *request.Request) interface{}
-
 }

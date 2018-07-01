@@ -5,8 +5,8 @@ import (
 	"scrapy/http/request"
 	"scrapy/http/response"
 	"scrapy/middleware/spidermiddlewares"
-	"scrapy/spiders"
 	"scrapy/settings"
+	"scrapy/spiders"
 )
 
 const (
@@ -75,16 +75,20 @@ func (ss *ScraperSlot) IsIdle() bool {
 	return len(ss.queue) == 0 && len(ss.active) == 0
 }
 
+func (ss *ScraperSlot) NeedsBackout() bool {
+	return false
+}
+
 type Scraper struct {
 	slot            *ScraperSlot
 	spidermw        *middleware.SpiderMiddlewareManager
 	itemProc        interface{}
 	concurrentItems interface{}
-	settings *settings.Settings
+	settings        *settings.Settings
 }
 
 func NewScraper(settings *settings.Settings) *Scraper {
-	return &Scraper{settings:settings}
+	return &Scraper{settings: settings}
 }
 
 func (s *Scraper) OpenSpider(spider spiders.Spider) {
@@ -126,8 +130,7 @@ func (s *Scraper) EnqueueScrape(resp response.Response, req *request.Request, sp
 }
 
 func (s *Scraper) scrapeNext(spider spiders.Spider, slot *ScraperSlot) {
-	for _, defered := range slot.queue {
-		println(defered)
+	for len(slot.queue) > 0 {
 		nextDeferred := slot.NextResponseRequestDeferred()
 		s.scrape(nextDeferred.Resp, nextDeferred.Req, spider)
 	}

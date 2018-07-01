@@ -6,20 +6,44 @@ import (
 	"scrapy/core/downloader"
 	"scrapy/http/request"
 	"scrapy/http/response"
-	"scrapy/spiders"
 	"scrapy/settings"
+	"scrapy/spiders"
+	"time"
 )
+
+type CallLaterOnce struct {
+	myFunc func(spider spiders.Spider)
+	spider spiders.Spider
+	timer  *time.Timer
+}
+
+func NewCallLaterOnce(myFunc func(spider spiders.Spider), spider spiders.Spider) *CallLaterOnce {
+	return &CallLaterOnce{myFunc: myFunc, spider: spider}
+}
+
+func (clo *CallLaterOnce) schedule(delay uint) {
+	clo.timer = time.AfterFunc(time.Duration(delay)*time.Second, func() {
+		clo.myFunc(clo.spider)
+	})
+}
+
+func (clo *CallLaterOnce) cancel() {
+	clo.timer.Stop()
+}
 
 type EngineSlot struct {
 	closing       bool
 	inProgress    map[*request.Request]bool
 	startRequests *list.List
 	closeIfIdle   bool
+	nextCall      *CallLaterOnce
 	scheduler     *Scheduler
+	heartbeat     *time.Ticker
 }
 
-func NewSlot(startRequests *list.List, closeIfIdle bool, scheduler *Scheduler) *EngineSlot {
-	return &EngineSlot{startRequests: startRequests, closeIfIdle: closeIfIdle, scheduler: scheduler}
+func NewSlot(startRequests *list.List, closeIfIdle bool, nextCall *CallLaterOnce, scheduler *Scheduler) *EngineSlot {
+	ticker := time.NewTicker(time.Second * 5)
+	return &EngineSlot{startRequests: startRequests, closeIfIdle: closeIfIdle, nextCall: nextCall, scheduler: scheduler, heartbeat: ticker}
 }
 
 func (es *EngineSlot) AddRequest(req *request.Request) {
@@ -34,8 +58,16 @@ func (es *EngineSlot) Close() {
 
 }
 
+func (es *EngineSlot) StartHeartbeat(delay uint) {
+	go func() {
+		for range es.heartbeat.C {
+			es.nextCall.schedule(delay)
+		}
+	}()
+}
+
 type ExecutionEngine struct {
-	settings *settings.Settings
+	settings   *settings.Settings
 	scheduler  *Scheduler
 	slot       *EngineSlot
 	spider     spiders.Spider
@@ -74,11 +106,14 @@ func (ee *ExecutionEngine) SpiderIsIdle(spider spiders.Spider) bool {
 }
 
 func (ee *ExecutionEngine) Crawl(req *request.Request, spider spiders.Spider) {
-
+	ee.Schedule(req, spider)
+	ee.slot.nextCall.schedule(0)
 }
 
-func (ee *ExecutionEngine) Schedule(req request.Request, spider spiders.Spider) {
-
+func (ee *ExecutionEngine) Schedule(req *request.Request, spider spiders.Spider) {
+	if !ee.slot.scheduler.EnqueueRequest(req) {
+		println("xxxxx")
+	}
 }
 
 func (ee *ExecutionEngine) Download(req request.Request, spider spiders.Spider) response.Response {
@@ -86,13 +121,16 @@ func (ee *ExecutionEngine) Download(req request.Request, spider spiders.Spider) 
 }
 
 func (ee *ExecutionEngine) OpenSpider(spider spiders.Spider, startRequests *list.List, closeIfIdle bool) {
+	nextCall := NewCallLaterOnce(ee.nextRequest, spider)
 	scheduler := NewScheduler(ee.settings)
 	startRequests = ee.scraper.spidermw.ProcessStartRequests(startRequests, spider)
-	slot := NewSlot(startRequests, closeIfIdle, scheduler)
+	slot := NewSlot(startRequests, closeIfIdle, nextCall, scheduler)
 	ee.slot = slot
 	ee.spider = spider
 	go scheduler.Open(spider)
 	go ee.scraper.OpenSpider(spider)
+	slot.nextCall.schedule(0)
+	slot.StartHeartbeat(5)
 }
 
 func (ee *ExecutionEngine) CloseSpider(spider spiders.Spider, reason string) (bool, error) {
@@ -102,8 +140,35 @@ func (ee *ExecutionEngine) CloseSpider(spider spiders.Spider, reason string) (bo
 	return true, nil
 }
 
-func (ee *ExecutionEngine) nextRequest(spider spiders.Spider) *request.Request {
-	return nil
+func (ee *ExecutionEngine) nextRequest(spider spiders.Spider) {
+	slot := ee.slot
+	if slot == nil {
+		return
+	}
+
+	if ee.paused {
+		return
+	}
+
+	for !ee.needsBackout(spider) {
+		if ee.nextRequestFromScheduler(spider) == nil {
+			break
+		}
+	}
+
+	if slot.startRequests.Len() > 0 && !ee.needsBackout(spider) {
+		req := slot.startRequests.Front().Value.(*request.Request)
+		ee.Crawl(req, spider)
+	}
+
+	if ee.SpiderIsIdle(spider) && slot.closeIfIdle {
+		ee.SpiderIsIdle(spider)
+	}
+}
+
+func (ee *ExecutionEngine) needsBackout(spider spiders.Spider) bool {
+	slot := ee.slot
+	return ee.running || slot.closing || ee.downloader.NeedsBackout() || ee.scraper.slot.NeedsBackout()
 }
 
 func (ee *ExecutionEngine) nextRequestFromScheduler(spider spiders.Spider) chan interface{} {
