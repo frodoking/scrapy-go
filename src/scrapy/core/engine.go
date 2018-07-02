@@ -9,6 +9,7 @@ import (
 	"scrapy/settings"
 	"scrapy/spiders"
 	"time"
+	"log"
 )
 
 type CallLaterOnce struct {
@@ -75,30 +76,39 @@ type ExecutionEngine struct {
 	paused     bool
 	downloader *downloader.Downloader
 	scraper    *Scraper
+	startTime  int64
+	spiderClosedCallback func()
 }
 
-func NewExecutionEngine(settings *settings.Settings) *ExecutionEngine {
-	return &ExecutionEngine{settings: settings, scraper: NewScraper(settings)}
+func NewExecutionEngine(settings *settings.Settings, spiderClosedCallback func()) *ExecutionEngine {
+	return &ExecutionEngine{settings: settings, scraper: NewScraper(settings), spiderClosedCallback:spiderClosedCallback}
 }
 
 func (ee *ExecutionEngine) Start() {
-
+	ee.startTime = time.Now().UnixNano()
+	ee.running = true
 }
 
 func (ee *ExecutionEngine) Stop() {
-
+	ee.running = false
 }
 
 func (ee *ExecutionEngine) Close() {
-
+	if ee.running {
+		ee.Stop()
+	} else if ee.spider != nil {
+		ee.closeAllSpiders()
+	} else {
+		ee.downloader.Close()
+	}
 }
 
 func (ee *ExecutionEngine) Pause() {
-
+	ee.paused = true
 }
 
 func (ee *ExecutionEngine) UnPause() {
-
+	ee.paused = false
 }
 
 func (ee *ExecutionEngine) SpiderIsIdle(spider spiders.Spider) bool {
@@ -137,7 +147,21 @@ func (ee *ExecutionEngine) CloseSpider(spider spiders.Spider, reason string) (bo
 	if reason == "" {
 		reason = "cancelled"
 	}
+
+	ee.downloader.Close()
+	ee.scraper.CloseSpider(spider)
+	ee.scheduler.Close(reason)
+	log.Print("Spider closed ,reason: ", reason)
+
+	ee.slot = nil
+	ee.spider = nil
+	ee.spiderClosedCallback()
+
 	return true, nil
+}
+
+func (ee *ExecutionEngine) closeAllSpiders()  {
+	ee.CloseSpider(ee.spider, "shutdown")
 }
 
 func (ee *ExecutionEngine) nextRequest(spider spiders.Spider) {
@@ -198,3 +222,6 @@ func (ee *ExecutionEngine) handleDownloaderOutput(resp response.Response, req *r
 	ee.scraper.EnqueueScrape(resp, req, spider)
 	return nil
 }
+
+
+

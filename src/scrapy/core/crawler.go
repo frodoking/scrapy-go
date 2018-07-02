@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"scrapy/settings"
 	"scrapy/spiders"
+	"log"
 )
 
 type Crawler struct {
@@ -18,15 +19,24 @@ func (c *Crawler) spiders() []spiders.Spider {
 }
 
 func (c *Crawler) Crawl(args []string, kwargs []string) {
+	defer func() {
+		err := recover()
+		if err != nil {
+			log.Fatal("start to crawl error:", err)
+			c.engine.Close()
+		}
+	}()
+
 	c.crawling = true
 	c.spider = c.createSpider()
 	c.engine = c.createEngine()
 	startRequests := c.spider.StartRequests()
 	go c.engine.OpenSpider(c.spider, startRequests, true)
+	go c.engine.Start()
 }
 
 func (c *Crawler) Stop() {
-
+	c.crawling = false
 }
 
 func (c *Crawler) createSpider() spiders.Spider {
@@ -34,7 +44,7 @@ func (c *Crawler) createSpider() spiders.Spider {
 }
 
 func (c *Crawler) createEngine() *ExecutionEngine {
-	return NewExecutionEngine(c.Settings)
+	return NewExecutionEngine(c.Settings, c.Stop)
 }
 
 type CrawlerRunner struct {

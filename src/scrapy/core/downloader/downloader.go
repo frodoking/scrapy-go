@@ -153,6 +153,12 @@ func (d *Downloader) download(slot *Slot, req *request.Request, spider spiders.S
 	return newResult
 }
 
+func (d *Downloader) Close() {
+	for _, slot := range d.slots {
+		slot.close()
+	}
+}
+
 func (d *Downloader) getSlot(req *request.Request, spider spiders.Spider) (string, *Slot) {
 	return "", nil
 }
