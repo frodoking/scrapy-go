@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"scrapy/common"
 	"scrapy/http/request"
 	"scrapy/spiders"
 )
@@ -15,11 +16,6 @@ var Classes = map[string]string{
 	"https": "HTTPDownloadHandler",
 	"s3":    "S3DownloadHandler",
 	"ftp":   "FTPDownloadHandler",
-}
-
-type DownloadHandler interface {
-	// return real response to chan
-	DownloadRequest(request *request.Request, spider spiders.Spider) chan interface{}
 }
 
 type DownloadHandlers struct {
@@ -51,7 +47,24 @@ func NewDownloadHandlers() *DownloadHandlers {
 		}
 	}
 
-	return &DownloadHandlers{schemes, handlers, notConfigured}
+	instance := &DownloadHandlers{schemes, handlers, notConfigured}
+
+	logger := common.WithLogger("handlers")
+	listener := common.ScrapySignal.Connect(common.EngineStopped)
+	go func() {
+		for {
+			select {
+			case event := <-listener:
+				if event != nil {
+					logger.Info("received : %s ", event.(string))
+					instance.close()
+					return
+				}
+			}
+		}
+	}()
+
+	return instance
 }
 
 func (dh *DownloadHandlers) getHandler(scheme string) DownloadHandler {
@@ -103,4 +116,10 @@ func (dh *DownloadHandlers) DownloadRequest(request *request.Request, spider spi
 	}
 
 	return handler.DownloadRequest(request, spider)
+}
+
+func (dh *DownloadHandlers) close() {
+	for _, handler := range dh.handlers {
+		handler.close()
+	}
 }

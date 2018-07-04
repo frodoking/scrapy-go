@@ -2,14 +2,15 @@ package core
 
 import (
 	"container/list"
+	"log"
 	"reflect"
+	"scrapy/common"
 	"scrapy/core/downloader"
 	"scrapy/http/request"
 	"scrapy/http/response"
 	"scrapy/settings"
 	"scrapy/spiders"
 	"time"
-	"log"
 )
 
 type CallLaterOnce struct {
@@ -68,29 +69,31 @@ func (es *EngineSlot) StartHeartbeat(delay uint) {
 }
 
 type ExecutionEngine struct {
-	settings   *settings.Settings
-	scheduler  *Scheduler
-	slot       *EngineSlot
-	spider     spiders.Spider
-	running    bool
-	paused     bool
-	downloader *downloader.Downloader
-	scraper    *Scraper
-	startTime  int64
+	settings             *settings.Settings
+	scheduler            *Scheduler
+	slot                 *EngineSlot
+	spider               spiders.Spider
+	running              bool
+	paused               bool
+	downloader           *downloader.Downloader
+	scraper              *Scraper
+	startTime            int64
 	spiderClosedCallback func()
 }
 
 func NewExecutionEngine(settings *settings.Settings, spiderClosedCallback func()) *ExecutionEngine {
-	return &ExecutionEngine{settings: settings, scraper: NewScraper(settings), spiderClosedCallback:spiderClosedCallback}
+	return &ExecutionEngine{settings: settings, scraper: NewScraper(settings), spiderClosedCallback: spiderClosedCallback}
 }
 
 func (ee *ExecutionEngine) Start() {
 	ee.startTime = time.Now().UnixNano()
 	ee.running = true
+	common.ScrapySignal.Send(common.EngineStarted, "engine_started")
 }
 
 func (ee *ExecutionEngine) Stop() {
 	ee.running = false
+	common.ScrapySignal.Send(common.EngineStopped, "engine_stopped")
 }
 
 func (ee *ExecutionEngine) Close() {
@@ -139,6 +142,9 @@ func (ee *ExecutionEngine) OpenSpider(spider spiders.Spider, startRequests *list
 	ee.spider = spider
 	go scheduler.Open(spider)
 	go ee.scraper.OpenSpider(spider)
+
+	common.ScrapySignal.Send(common.SpiderOpened, spider)
+
 	slot.nextCall.schedule(0)
 	slot.StartHeartbeat(5)
 }
@@ -157,10 +163,11 @@ func (ee *ExecutionEngine) CloseSpider(spider spiders.Spider, reason string) (bo
 	ee.spider = nil
 	ee.spiderClosedCallback()
 
+	common.ScrapySignal.Send(common.SpiderClosed, reason)
 	return true, nil
 }
 
-func (ee *ExecutionEngine) closeAllSpiders()  {
+func (ee *ExecutionEngine) closeAllSpiders() {
 	ee.CloseSpider(ee.spider, "shutdown")
 }
 
@@ -222,6 +229,3 @@ func (ee *ExecutionEngine) handleDownloaderOutput(resp response.Response, req *r
 	ee.scraper.EnqueueScrape(resp, req, spider)
 	return nil
 }
-
-
-

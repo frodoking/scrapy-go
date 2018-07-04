@@ -2,6 +2,7 @@ package spiders
 
 import (
 	"container/list"
+	"scrapy/common"
 	"scrapy/http/request"
 	"scrapy/http/response"
 	"scrapy/settings"
@@ -18,10 +19,25 @@ type DefaultSpider struct {
 	transferring   map[int]bool
 	lastSeen       uint
 	laterCall      interface{}
+	settings       *settings.Settings
 }
 
 func NewDefaultSpider() Spider {
 	spider := &DefaultSpider{}
+	listener := common.ScrapySignal.Connect(common.SpiderClosed)
+	logger := common.WithLogger("spiders")
+	go func() {
+		for {
+			select {
+			case reason := <-listener:
+				if reason != nil {
+					logger.Info("received : %s ", reason.(string))
+					spider.Close(reason.(string))
+					return
+				}
+			}
+		}
+	}()
 	return spider
 }
 
@@ -47,4 +63,13 @@ func (s *DefaultSpider) UpdateSettings(settings *settings.Settings) {
 
 func (s *DefaultSpider) HandlesRequest(request *request.Request) interface{} {
 	return nil
+}
+
+func (s *DefaultSpider) GetAttrFromSettings(key string) interface{} {
+	return s.settings.Get(key)
+}
+
+func (s *DefaultSpider) Close(reason string) {
+	logger := common.WithLogger("spiders")
+	logger.Info("DefaultSpider Closed, because of ", reason)
 }

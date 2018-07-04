@@ -9,7 +9,7 @@ type MiddlewareManager struct {
 	Middlewares *list.List
 }
 
-func (mwm *MiddlewareManager) addMiddleware(mw interface{}) {
+func (mwm *MiddlewareManager) AddMiddleware(mw interface{}) {
 	mwm.Middlewares.PushBack(mw)
 }
 

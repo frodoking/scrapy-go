@@ -6,6 +6,7 @@ import (
 )
 
 type FileDownloadHandler struct {
+	DefaultDownloadHandler
 }
 
 func (fdh *FileDownloadHandler) DownloadRequest(request *request.Request, spider spiders.Spider) chan interface{} {

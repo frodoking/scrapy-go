@@ -2,9 +2,9 @@ package core
 
 import (
 	"fmt"
+	"log"
 	"scrapy/settings"
 	"scrapy/spiders"
-	"log"
 )
 
 type Crawler struct {

@@ -57,7 +57,7 @@ type Downloader struct {
 
 func NewDownloader() *Downloader {
 	handlers := handlers.NewDownloadHandlers()
-	middleware := &middleware.DownloaderMiddlewareManager{}
+	middleware := middleware.NewDownloaderMiddlewareManager()
 
 	downloader := &Downloader{handlers: handlers, middleware: middleware}
 

@@ -8,44 +8,60 @@ import (
 )
 
 type Middleware interface {
-	ProcessRequest(request *request.Request, spider spiders.Spider) chan interface{}
+	ProcessRequest(request *request.Request, spider spiders.Spider) (response.Response, error)
 	ProcessResponse(request *request.Request, response response.Response, spider spiders.Spider)
 	ProcessException(request *request.Request, exception interface{}, spider spiders.Spider)
+}
+
+type DownloaderMiddleware struct {
+}
+
+func (cm *DownloaderMiddleware) ProcessRequest(request *request.Request, spider spiders.Spider) (response.Response, error) {
+	return nil, nil
+}
+
+func (cm *DownloaderMiddleware) ProcessResponse(request *request.Request, response response.Response, spider spiders.Spider) {
+
+}
+func (cm *DownloaderMiddleware) ProcessException(request *request.Request, exception interface{}, spider spiders.Spider) {
+
 }
 
 type DownloaderMiddlewareManager struct {
 	*middleware.MiddlewareManager
 }
 
+func NewDownloaderMiddlewareManager() *DownloaderMiddlewareManager {
+	instance := &DownloaderMiddlewareManager{}
+	instance.AddMiddleware(&CookiesMiddleware{})
+	instance.AddMiddleware(&DownloadTimeoutMiddleware{})
+	instance.AddMiddleware(&RobotsTxtMiddleware{})
+	return instance
+}
+
 func (dmm *DownloaderMiddlewareManager) Download(request *request.Request, spider spiders.Spider) (response.Response, error) {
-	var resp response.Response
-	var err error
+	var respResult response.Response
+	var errResult error
+
 	for e := dmm.Middlewares.Front(); e != nil; e = e.Next() {
 		mw := e.Value.(Middleware)
-		responseChan := mw.ProcessRequest(request, spider)
-		if responseChan != nil {
-			select {
-			case resultTmp := <-responseChan:
-				if resultTmp != nil {
-					switch resultTmp.(type) {
-					case error:
-						mw.ProcessException(request, resultTmp, spider)
-						err = resultTmp.(error)
-						break
-					case response.Response:
-						resp = resultTmp.(response.Response)
-					}
-				}
+		resp, err := mw.ProcessRequest(request, spider)
+		if err == nil {
+			if resp != nil {
+				respResult = resp
 			}
+		} else {
+			mw.ProcessException(request, resp, spider)
+			errResult = err
 		}
 	}
 
-	if resp != nil {
+	if respResult != nil {
 		for e := dmm.Middlewares.Back(); e != nil; e = e.Prev() {
 			mw := e.Value.(Middleware)
-			mw.ProcessResponse(request, resp, spider)
+			mw.ProcessResponse(request, respResult, spider)
 		}
 	}
 
-	return resp, err
+	return respResult, errResult
 }

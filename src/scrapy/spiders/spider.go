@@ -14,4 +14,8 @@ type Spider interface {
 	Parse(response response.Response)
 
 	HandlesRequest(request *request.Request) interface{}
+
+	GetAttrFromSettings(key string) interface{}
+
+	Close(reason string)
 }

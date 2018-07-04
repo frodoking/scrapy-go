@@ -3,12 +3,11 @@ package middleware
 import (
 	"scrapy/http/request"
 	"scrapy/http/response"
-	"scrapy/middleware"
 	"scrapy/spiders"
 )
 
 type RobotsTxtMiddleware struct {
-	*middleware.MiddlewareManager
+	*DownloaderMiddleware
 }
 
 func (cm *RobotsTxtMiddleware) ProcessRequest(request *request.Request, spider spiders.Spider) chan interface{} {

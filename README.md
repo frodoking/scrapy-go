@@ -22,3 +22,4 @@ The data flow in Scrapy is controlled by the execution engine, and goes like thi
 Related Projects
 
 * [scrapy-parsel-go](https://github.com/frodoking/scrapy-parsel-go)
+* [logrus](https://github.com/Sirupsen/logrus) Structured, pluggable logging for Go.

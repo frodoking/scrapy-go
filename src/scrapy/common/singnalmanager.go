@@ -3,35 +3,35 @@ package common
 import "sync"
 
 type SignalManager struct {
-	connector map[string][]chan interface{}
-	rWMutex *sync.RWMutex
+	connector map[Signal][]chan interface{}
+	rWMutex   *sync.RWMutex
 }
 
-func (sm *SignalManager) Connect(event string) chan interface{} {
+func (sm *SignalManager) Connect(signal Signal) chan interface{} {
 	sm.rWMutex.Lock()
 	defer sm.rWMutex.Unlock()
 
 	listener := make(chan interface{})
 	if sm.connector == nil {
-		sm.connector = make(map[string][]chan interface{})
+		sm.connector = make(map[Signal][]chan interface{})
 	}
-	if _, ok := sm.connector[event]; ok {
-		sm.connector[event] = append(sm.connector[event], listener)
+	if _, ok := sm.connector[signal]; ok {
+		sm.connector[signal] = append(sm.connector[signal], listener)
 	} else {
-		sm.connector[event] = []chan interface{}{listener}
+		sm.connector[signal] = []chan interface{}{listener}
 	}
 	return listener
 }
 
-func (sm *SignalManager) Disconnect(event string, ch chan interface{}) bool {
+func (sm *SignalManager) Disconnect(signal Signal, ch chan interface{}) bool {
 	sm.rWMutex.Lock()
 	defer sm.rWMutex.Unlock()
 
-	if _, ok := sm.connector[event]; ok {
-		for i, item := range sm.connector[event] {
+	if _, ok := sm.connector[signal]; ok {
+		for i, item := range sm.connector[signal] {
 			if item == ch {
 				closed := safeClose(item)
-				sm.connector[event] = append(sm.connector[event][:i], sm.connector[event][i+1:]...)
+				sm.connector[signal] = append(sm.connector[signal][:i], sm.connector[signal][i+1:]...)
 				return closed
 			}
 		}
@@ -39,21 +39,21 @@ func (sm *SignalManager) Disconnect(event string, ch chan interface{}) bool {
 	return false
 }
 
-func (sm *SignalManager) DisconnectAll(event string) bool {
+func (sm *SignalManager) DisconnectAll(signal Signal) bool {
 	sm.rWMutex.Lock()
 	defer sm.rWMutex.Unlock()
 
-	if _, ok := sm.connector[event]; ok {
-		for _, item := range sm.connector[event] {
+	if _, ok := sm.connector[signal]; ok {
+		for _, item := range sm.connector[signal] {
 			closed := safeClose(item)
-			delete(sm.connector, event)
+			delete(sm.connector, signal)
 			return closed
 		}
 	}
 	return false
 }
 
-func (sm *SignalManager) Send(event string, message string) (success bool) {
+func (sm *SignalManager) Send(signal Signal, message interface{}) (success bool) {
 	sm.rWMutex.RLock()
 	defer sm.rWMutex.RUnlock()
 	defer func() {
@@ -62,8 +62,8 @@ func (sm *SignalManager) Send(event string, message string) (success bool) {
 		}
 	}()
 
-	if _, ok := sm.connector[event]; ok {
-		for _, handler := range sm.connector[event] {
+	if _, ok := sm.connector[signal]; ok {
+		for _, handler := range sm.connector[signal] {
 			go func(handler chan interface{}) {
 				sm.rWMutex.RLock()
 				defer sm.rWMutex.RUnlock()
@@ -100,4 +100,4 @@ func safeClose(ch chan interface{}) (justClosed bool) {
 	return true
 }
 
-var ScrapySignal = &SignalManager{make(map[string][]chan interface{}), new(sync.RWMutex)}
+var ScrapySignal = &SignalManager{make(map[Signal][]chan interface{}), new(sync.RWMutex)}
